@@ -2,3 +2,6 @@ node_modules/
 .DS_Store
 .env
 data/store.json
+
+# Local manual-review package for the category-upgrade answer key (not needed by the app)
+manual-review/

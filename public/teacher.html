@@ -84,6 +84,19 @@
               <label><span>Утасны дугаар</span><input name="phone" type="tel" /></label>
               <label><span>Хандах хугацаа (хоног)</span><input name="durationDays" type="number" value="30" min="1" max="365" /></label>
               <label><span>Тэмдэглэл</span><input name="notes" /></label>
+              <div class="full">
+                <span style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Шалгалтын эрх</span>
+                <div style="display:flex;gap:16px;flex-wrap:wrap">
+                  <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+                    <input type="checkbox" name="entitlements" value="regular" checked style="width:auto" />
+                    <span>Дүрмийн тест</span>
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-weight:600">
+                    <input type="checkbox" name="entitlements" value="category_upgrade" style="width:auto" />
+                    <span>Ангилал ахиулах</span>
+                  </label>
+                </div>
+              </div>
               <div class="full" style="display:flex;gap:10px">
                 <button class="btn btn-primary" type="submit">Бүртгэх ба ID үүсгэх</button>
                 <button class="btn btn-ghost" type="button" id="create-cancel">Болих</button>

@@ -114,12 +114,50 @@
     }
   }
 
+  /** Shows only the areas the student has been granted. */
+  function applyEntitlements(entitlements) {
+    const list = Array.isArray(entitlements) ? entitlements : ["regular"];
+    const hasRegular = list.indexOf("regular") !== -1;
+    const hasUpgrade = list.indexOf("category_upgrade") !== -1;
+
+    document.getElementById("category-upgrade-card").hidden = !hasUpgrade;
+
+    if (!hasRegular) {
+      // Granted only the category-upgrade exam: send them straight there
+      // rather than showing a 40-chapter dashboard they cannot use.
+      if (hasUpgrade) {
+        location.replace("/category-upgrade");
+        return false;
+      }
+      document.getElementById("regular-course").hidden = true;
+      document.querySelector(".hero-card").hidden = true;
+    }
+
+    const nav = document.getElementById("exam-switch");
+    if (hasRegular && hasUpgrade) {
+      nav.innerHTML = "";
+      const a = document.createElement("a");
+      a.href = "/";
+      a.className = "active";
+      a.textContent = "Дүрмийн тест";
+      const b = document.createElement("a");
+      b.href = "/category-upgrade";
+      b.textContent = "Ангилал ахиулах";
+      nav.appendChild(a);
+      nav.appendChild(b);
+      nav.hidden = false;
+    }
+    return true;
+  }
+
   async function init() {
     const student = await P.requireStudent();
 
     const chip = document.getElementById("student-chip");
     chip.textContent = student.name;
     chip.hidden = false;
+
+    if (!applyEntitlements(student.entitlements)) return;
 
     const progress = P.loadProgress();
     render(progress);

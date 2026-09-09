@@ -346,7 +346,11 @@
   }
 
   Promise.all([P.requireStudent(), P.loadQuestions()])
-    .then(([, all]) => {
+    .then(([student, all]) => {
+      const entitlements = student.entitlements || ["regular"];
+      if (entitlements.indexOf("regular") === -1) {
+        throw new Error("Танд дүрмийн тестийн эрх олгогдоогүй байна. Багштайгаа холбогдоно уу.");
+      }
       questions = P.questionsForChapter(all, chapterId);
       if (questions.length !== P.QUESTIONS_PER_CHAPTER) {
         throw new Error("Бүлэг " + chapterId + "-ийн өгөгдөл дутуу байна (" + questions.length + "/20).");

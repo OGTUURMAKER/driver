@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ангилал ахиулах шалгалтын бэлтгэл — 20 тест, 200 асуулт" />
+    <title>Ангилал ахиулах — 20 тест, 200 асуулт</title>
+    <link rel="stylesheet" href="/public/platform.css" />
+    <script src="/public/platform.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">🚚</span>
+          <span>Ангилал ахиулах</span>
+        </div>
+        <div class="topbar-actions">
+          <span class="mode-chip" id="student-chip" hidden></span>
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих">🌙</button>
+          <button id="logout-btn" class="icon-btn" type="button" aria-label="Гарах" title="Гарах">⏻</button>
+        </div>
+      </header>
+
+      <main>
+        <nav class="exam-switch" id="exam-switch" aria-label="Шалгалтын хэсэг"></nav>
+
+        <section class="hero-card" aria-labelledby="hero-title">
+          <p class="hero-eyebrow">Ангилал ахиулах шалгалт</p>
+          <h1 class="hero-title" id="hero-title">Ангилал ахиулахад бэлдье</h1>
+          <p class="hero-sub" id="hero-sub">20 тест · 10 асуулт тус бүр</p>
+          <div class="hero-progress-track" role="progressbar" aria-label="Нийт явц"
+               aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hero-progressbar">
+            <div class="hero-progress-fill" id="hero-progress-fill"></div>
+          </div>
+          <p class="hero-progress-label" id="hero-progress-label">Явц тооцоолж байна…</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" id="continue-btn" href="/category-upgrade/practice?test=1">Тест эхлүүлэх</a>
+            <a class="btn btn-ghost" href="#tests">Тестүүдийг харах</a>
+          </div>
+        </section>
+
+        <section class="stats-grid" aria-label="Статистик">
+          <div class="card stat-card">
+            <div class="stat-icon" aria-hidden="true">📝</div>
+            <div class="stat-value" id="stat-started">—</div>
+            <div class="stat-label" id="stat-started-label">Тест эхэлсэн</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon success" aria-hidden="true">✅</div>
+            <div class="stat-value" id="stat-passed">—</div>
+            <div class="stat-label" id="stat-passed-label">Тэнцсэн тест</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon" aria-hidden="true">🎯</div>
+            <div class="stat-value" id="stat-average">—</div>
+            <div class="stat-label">Дундаж оноо / 10</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-icon accent" aria-hidden="true">🔁</div>
+            <div class="stat-value" id="stat-attempts">—</div>
+            <div class="stat-label">Нийт оролдлого</div>
+          </div>
+        </section>
+
+        <div id="error-area"></div>
+
+        <section aria-labelledby="tests-title" id="tests">
+          <div class="section-header">
+            <h2 class="section-title" id="tests-title">Бүх тестүүд</h2>
+            <span class="section-hint">10 асуулт тус бүр</span>
+          </div>
+          <div class="chapter-grid" id="test-grid">
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+            <div class="skeleton-card"></div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer-links">
+        <a href="/login">Багш / Сурагчийн нэвтрэлт</a>
+      </footer>
+    </div>
+
+    <script src="/public/category-upgrade.js"></script>
+  </body>
+</html>

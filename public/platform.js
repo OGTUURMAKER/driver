@@ -87,6 +87,34 @@
       .catch(() => {}); // offline — instructor view updates on next sync
   }
 
+  /** Authenticated JSON GET; throws with the server's Mongolian message. */
+  function apiGet(path) {
+    return fetch(path, { headers: { Authorization: "Bearer " + studentToken() }, cache: "no-store" })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (res.status === 401) { logout(); return new Promise(() => {}); }
+        if (!res.ok) throw new Error(data.error || "Алдаа гарлаа (" + res.status + ")");
+        return data;
+      });
+  }
+
+  /** Authenticated JSON POST; same error handling as apiGet. */
+  function apiPost(path, payload) {
+    return fetch(path, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + studentToken()
+      },
+      body: JSON.stringify(payload || {})
+    }).then(async (res) => {
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) { logout(); return new Promise(() => {}); }
+      if (!res.ok) throw new Error(data.error || "Алдаа гарлаа (" + res.status + ")");
+      return data;
+    });
+  }
+
   function fetchServerProgress() {
     const token = studentToken();
     if (!token) return Promise.resolve(null);
@@ -260,6 +288,8 @@
     syncActivity,
     fetchServerProgress,
     startHeartbeat,
+    apiGet,
+    apiPost,
     loadQuestions,
     questionsForChapter,
     loadProgress,

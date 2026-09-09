@@ -74,6 +74,36 @@
     return t && Date.now() - new Date(t).getTime() <= 5 * 60 * 1000;
   }
 
+  const ENTITLEMENT_LABELS = {
+    regular: "Дүрмийн тест",
+    category_upgrade: "Ангилал ахиулах"
+  };
+
+  function entitlementPills(list) {
+    const ids = Array.isArray(list) && list.length ? list : ["regular"];
+    return ids
+      .map((id) => '<span class="chapter-badge">' + esc(ENTITLEMENT_LABELS[id] || id) + "</span>")
+      .join(" ");
+  }
+
+  /** Checkbox pair used both when registering and when editing a student. */
+  function entitlementFields(selected) {
+    const ids = Array.isArray(selected) && selected.length ? selected : ["regular"];
+    return Object.keys(ENTITLEMENT_LABELS)
+      .map((id) =>
+        '<label style="display:flex;align-items:center;gap:8px;font-weight:600">' +
+          '<input type="checkbox" name="entitlements" value="' + id + '"' +
+          (ids.indexOf(id) !== -1 ? " checked" : "") + ' style="width:auto" />' +
+          "<span>" + ENTITLEMENT_LABELS[id] + "</span>" +
+        "</label>"
+      )
+      .join("");
+  }
+
+  function readEntitlements(form) {
+    return Array.from(form.querySelectorAll('input[name="entitlements"]:checked')).map((i) => i.value);
+  }
+
   function statusPill(status, online) {
     const labels = { active: "Идэвхтэй", expired: "Хугацаа дууссан", disabled: "Хаагдсан" };
     return (online ? '<span class="online-dot" title="Онлайн"></span>' : "") +
@@ -210,7 +240,8 @@
       '<tr data-id="' + row.id + '">' +
         '<td><div class="cell-name">' + esc(row.name) + '</div>' +
           '<div class="cell-sub">' + esc(row.phone || "Утас бүртгээгүй") + "</div></td>" +
-        '<td><span class="code-pill">' + esc(row.code) + "</span></td>" +
+        '<td><span class="code-pill">' + esc(row.code) + "</span>" +
+          '<div class="cell-sub">' + entitlementPills(row.entitlements) + "</div></td>" +
         "<td>" + statusPill(row.status, isOnline(row)) + "</td>" +
         "<td>" + fmtDate(row.createdAt) + "</td>" +
         "<td>" + fmtDate(row.expiresAt) + "</td>" +
@@ -316,7 +347,8 @@
           name: String(fd.get("name") || "").trim(),
           phone: String(fd.get("phone") || "").trim(),
           notes: String(fd.get("notes") || "").trim(),
-          durationDays: parseInt(fd.get("durationDays"), 10) || 30
+          durationDays: parseInt(fd.get("durationDays"), 10) || 30,
+          entitlements: readEntitlements(form)
         })
       });
       form.reset();
@@ -401,6 +433,13 @@
         statCard("🕐", "", fmtRelative(st.lastActivityAt || st.lastLoginAt), "Сүүлд идэвхтэй") +
         statCard("📖", "", sum.lastChapter ? "Бүлэг " + sum.lastChapter : "—",
           sum.currentQuestion ? "Одоо: асуулт " + sum.currentQuestion : "Сүүлийн бүлэг") +
+        ((st.entitlements || []).indexOf("category_upgrade") !== -1 && st.categoryUpgrade
+          ? statCard("🚚", "", st.categoryUpgrade.testsPassed + "/" + st.categoryUpgrade.totalTests,
+              "Ангилал ахиулах — тэнцсэн") +
+            statCard("🎯", "",
+              st.categoryUpgrade.averageScore === null ? "—" : st.categoryUpgrade.averageScore,
+              "Ангилал ахиулах — дундаж / " + st.categoryUpgrade.questionsPerTest)
+          : "") +
       "</div>" +
 
       '<div class="profile-grid">' +
@@ -413,6 +452,7 @@
             "<dt>Бүртгэсэн</dt><dd>" + fmtDate(st.createdAt) + "</dd>" +
             "<dt>Дуусах</dt><dd>" + fmtDate(st.expiresAt) + "</dd>" +
             "<dt>Сүүлд нэвтэрсэн</dt><dd>" + fmtDateTime(st.lastLoginAt) + "</dd>" +
+            "<dt>Шалгалтын эрх</dt><dd>" + entitlementPills(st.entitlements) + "</dd>" +
             "<dt>Тэмдэглэл</dt><dd>" + esc(st.notes || "—") + "</dd>" +
           "</dl>" +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">' +
@@ -428,6 +468,11 @@
             '<label><span>Нэр</span><input name="name" value="' + esc(st.name) + '" minlength="2" required /></label>' +
             '<label><span>Утас</span><input name="phone" value="' + esc(st.phone) + '" /></label>' +
             '<label class="full"><span>Тэмдэглэл</span><input name="notes" value="' + esc(st.notes) + '" /></label>' +
+            '<div class="full"><span style="display:block;font-size:12px;font-weight:700;' +
+              'color:var(--text-muted);margin-bottom:8px">Шалгалтын эрх</span>' +
+              '<div style="display:flex;gap:16px;flex-wrap:wrap">' +
+                entitlementFields(st.entitlements) +
+              "</div></div>" +
             '<div class="full"><button class="btn btn-primary" type="submit">Хадгалах</button></div>' +
           "</form>" +
           (st.extensions && st.extensions.length
@@ -510,7 +555,8 @@
           body: JSON.stringify({
             name: String(fd.get("name") || "").trim(),
             phone: String(fd.get("phone") || "").trim(),
-            notes: String(fd.get("notes") || "").trim()
+            notes: String(fd.get("notes") || "").trim(),
+            entitlements: readEntitlements(editForm)
           })
         });
         toast("Хадгалагдлаа");

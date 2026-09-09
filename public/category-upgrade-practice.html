@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="mn">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ангилал ахиулах — тест</title>
+    <link rel="stylesheet" href="/public/platform.css" />
+    <script src="/public/platform.js"></script>
+  </head>
+  <body>
+    <div class="practice-shell">
+      <header class="practice-topbar">
+        <a class="icon-btn" href="/category-upgrade" aria-label="Тестийн жагсаалт руу буцах">←</a>
+        <div class="practice-title">
+          <span id="test-title">Тест —</span>
+          <small id="question-counter">Асуулт — / 10</small>
+        </div>
+        <span class="mode-chip" id="mode-chip">Сургалт</span>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих">🌙</button>
+      </header>
+
+      <div class="quiz-progress-track" role="progressbar" aria-label="Тестийн явц"
+           aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="quiz-progressbar">
+        <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+      </div>
+
+      <div id="error-area"></div>
+
+      <main id="quiz-area" hidden>
+        <div class="question-card">
+          <div class="question-meta">
+            <span id="question-label">Асуулт —</span>
+            <span id="exam-timer" hidden>00:00</span>
+          </div>
+          <p class="cu-question-text" id="question-text"></p>
+          <div class="question-image-wrap" id="image-wrap" hidden>
+            <div class="image-skeleton" id="image-skeleton"></div>
+            <img class="question-image" id="question-image" alt="" decoding="async" />
+          </div>
+          <div class="answers answers-text" id="answers" role="group" aria-label="Хариултын сонголтууд"></div>
+          <div class="feedback-area" id="feedback" role="status" aria-live="polite"></div>
+        </div>
+
+        <div class="quiz-nav">
+          <button class="btn btn-ghost" id="prev-btn" type="button">← Өмнөх</button>
+          <button class="btn btn-primary" id="next-btn" type="button">Дараах →</button>
+        </div>
+
+        <nav class="question-dots" id="question-dots" aria-label="Асуулт руу очих"></nav>
+      </main>
+
+      <main id="results-area" hidden></main>
+    </div>
+
+    <div class="mode-overlay" id="mode-overlay" hidden>
+      <div class="mode-dialog" role="dialog" aria-modal="true" aria-labelledby="mode-title">
+        <h2 id="mode-title">Горим сонгоно уу</h2>
+        <p id="mode-test-label">Тест —</p>
+        <div class="mode-options">
+          <button class="mode-option" id="mode-learning" type="button">
+            <div class="mo-title">📖 Сургалтын горим</div>
+            <div class="mo-desc">Хариулт бүрийн дараа зөв хариултыг шууд харуулна.</div>
+          </button>
+          <button class="mode-option" id="mode-exam" type="button">
+            <div class="mo-title">⏱️ Шалгалтын горим</div>
+            <div class="mo-desc">Дуустал хариулт харагдахгүй, төгсгөлд нь оноо болон алдаагаа харна.</div>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="/public/category-upgrade-practice.js"></script>
+  </body>
+</html>

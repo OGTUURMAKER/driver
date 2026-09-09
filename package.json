@@ -8,7 +8,13 @@
     "import:images": "node scripts/import-images.js",
     "convert:images": "node scripts/convert-images.js",
     "generate:data": "node scripts/generate-data.js",
-    "validate": "node scripts/validate.js"
+    "validate": "node scripts/validate.js",
+    "import:category-upgrade": "node scripts/import-category-upgrade.js",
+    "generate:category-upgrade": "node scripts/generate-category-upgrade.js",
+    "validate:category-upgrade": "node scripts/validate-category-upgrade.js",
+    "test:category-upgrade": "node scripts/test-category-upgrade.js",
+    "validate:all": "npm run validate && npm run validate:category-upgrade",
+    "test": "node scripts/test-category-upgrade.js"
   },
   "license": "MIT",
   "devDependencies": {
