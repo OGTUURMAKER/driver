@@ -8,6 +8,9 @@
  *   - placeholders ({name}) match between the two languages
  *   - data/category-upgrade/translations.zh.json lines up with the question
  *     bank: same ids, same option count, no answer data, no leftover Cyrillic words
+ *   - public/data/questions.zh.json (40-chapter bank): known ids, 2–5 options,
+ *     every answer key within the transcribed options, and identical to what
+ *     data-source/regular-zh/ generates
  *
  * Usage: node scripts/validate-i18n.js
  */
@@ -98,6 +101,50 @@ function checkQuestionTranslations() {
   return { total, translated };
 }
 
+/** The 40-chapter bank: Chinese shown under each image, plus its reviewable source. */
+function checkRegularTranslations() {
+  const bank = JSON.parse(fs.readFileSync(path.join(PUBLIC, "data", "questions.json"), "utf8"));
+  const byId = new Map(bank.map((q) => [q.id, q]));
+  const published = JSON.parse(fs.readFileSync(path.join(PUBLIC, "data", "questions.zh.json"), "utf8"));
+  const zh = published.questions || {};
+
+  for (const [id, entry] of Object.entries(zh)) {
+    const q = byId.get(id);
+    if (!q) { errors.push(`questions.zh.json: unknown question id ${id}`); continue; }
+    const options = Array.isArray(entry.options) ? entry.options : [];
+    check(typeof entry.question === "string" && entry.question.trim(), `${id}: empty Chinese question`);
+    check(options.length >= 2 && options.length <= 5, `${id}: ${options.length} options (expected 2–5)`);
+    check(q.correctAnswer <= options.length,
+      `${id}: answer key is ${q.correctAnswer} but only ${options.length} options were transcribed`);
+    options.forEach((o, i) => check(String(o).trim(), `${id}: Chinese option ${i + 1} is blank`));
+    check(!("correctAnswer" in entry) && !("answer" in entry), `${id}: translation must not carry answers`);
+    // "ЗОГС" is printed on the sign / road marking itself, so it is quoted as-is.
+    const text = (entry.question + " " + options.join(" ")).replace(/ЗОГС/gi, "");
+    check(!/[А-Яа-яЁёӨөҮү]{3,}/.test(text), `${id}: untranslated Mongolian left in the Chinese text`);
+  }
+
+  // The published file must be exactly what the source generates.
+  const sourceDir = path.join(ROOT, "data-source", "regular-zh");
+  if (fs.existsSync(sourceDir)) {
+    let sourceCount = 0;
+    for (const file of fs.readdirSync(sourceDir).filter((f) => /^chapter-\d{2}\.json$/.test(f))) {
+      const entries = JSON.parse(fs.readFileSync(path.join(sourceDir, file), "utf8"));
+      for (const [id, entry] of Object.entries(entries)) {
+        sourceCount += 1;
+        const mnOptions = (entry.mn && entry.mn.options) || [];
+        const zhOptions = (entry.zh && entry.zh.options) || [];
+        check(mnOptions.length === zhOptions.length,
+          `${file} ${id}: ${mnOptions.length} Mongolian vs ${zhOptions.length} Chinese options`);
+        check(JSON.stringify(zh[id]) === JSON.stringify({ question: entry.zh && entry.zh.question, options: zhOptions }),
+          `${id}: public/data/questions.zh.json is out of date — run npm run generate:regular-zh`);
+      }
+    }
+    check(sourceCount === Object.keys(zh).length,
+      `questions.zh.json has ${Object.keys(zh).length} entries, source has ${sourceCount} — regenerate it`);
+  }
+  return { total: bank.length, translated: Object.keys(zh).length };
+}
+
 function main() {
   const dictionaries = loadDictionaries();
   if (errors.length) return finish();
@@ -122,10 +169,12 @@ function main() {
   for (const [key, file] of used) check(key in mn, `${file} uses unknown key "${key}"`);
 
   const q = checkQuestionTranslations();
+  const r = checkRegularTranslations();
 
   console.log("=== I18N VALIDATION REPORT ===");
   console.log(`Dictionary keys:  mn ${Object.keys(mn).length} · zh ${Object.keys(zh).length}`);
   console.log(`Keys used in UI:  ${used.size}`);
+  console.log(`Дүрмийн тест:     ${r.translated} / ${r.total} questions have Chinese`);
   console.log(`Ангилал ахиулах:  ${q.translated} / ${q.total} questions have Chinese`);
   finish();
 }

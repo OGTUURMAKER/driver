@@ -88,6 +88,7 @@ I18N.register("mn", {
   "practice.answersAria": "Хариултын сонголтууд",
   "practice.correct": "Зөв байна! 🎉",
   "practice.wrong": "Буруу байна. Зөв хариулт: {answer}",
+  "practice.wrongWithText": "Буруу байна. Зөв хариулт: {answer}. {text}",
   "practice.prev": "← Өмнөх",
   "practice.next": "Дараах →",
   "practice.finish": "Дуусгах ✓",

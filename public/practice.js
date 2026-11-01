@@ -125,9 +125,12 @@
     if (revealed) {
       const good = selected === q.correctAnswer;
       el.feedback.classList.add("show", good ? "good" : "bad");
+      const correctText = translatedOption(q, q.correctAnswer);
       el.feedback.textContent = good
         ? t("practice.correct")
-        : t("practice.wrong", { answer: q.correctAnswer });
+        : correctText
+          ? t("practice.wrongWithText", { answer: q.correctAnswer, text: correctText })
+          : t("practice.wrong", { answer: q.correctAnswer });
     }
 
     el.prevBtn.disabled = index === 0;
@@ -140,6 +143,30 @@
     renderDots();
     preload(index + 1);
     preload(index + 2);
+  }
+
+  /** Translated text of option n (1-based), or "" when there is no translation. */
+  function translatedOption(q, n) {
+    const entry = translations[q.id];
+    return entry && Array.isArray(entry.options) && entry.options[n - 1] ? entry.options[n - 1] : "";
+  }
+
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+  }
+
+  /** Translated question and correct option under a mistake's image (results page). */
+  function mistakeTranslation(q) {
+    const entry = translations[q.id];
+    if (!entry || !entry.question) return "";
+    const correct = translatedOption(q, q.correctAnswer);
+    return '<div class="question-translation mistake-translation">' +
+      '<div class="qt-label">' + escapeHtml(t("practice.translation")) + "</div>" +
+      '<p class="qt-question">' + escapeHtml(entry.question) + "</p>" +
+      (correct ? '<p class="qt-correct">' + q.correctAnswer + ". " + escapeHtml(correct) + "</p>" : "") +
+    "</div>";
   }
 
   /* The question itself is printed in the image (Mongolian). In Chinese the
@@ -317,6 +344,7 @@
                 '<span class="right">' + t("results.correctAnswer", { answer: q.correctAnswer }) + "</span></div>" +
               '<img src="' + q.imagePath + '" alt="' +
                 t("practice.imageAltChapter", { chapter: chapterId, n: q.questionNumber }) + '" loading="lazy"/>' +
+              mistakeTranslation(q) +
             "</div>"
           ).join("") +
           "</div>"

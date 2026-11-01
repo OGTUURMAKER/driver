@@ -1368,6 +1368,9 @@ a { color: var(--primary); text-decoration: none; }
 .question-translation .qt-question { margin: 0 0 6px; font-weight: 600; }
 .question-translation .qt-options { margin: 0; padding-left: 22px; }
 .question-translation .qt-note { margin: 0; font-size: 13px; color: var(--text-secondary); }
+.question-translation .qt-correct { margin: 0; font-weight: 600; color: var(--success); }
+
+.mistake-translation { margin: 10px 0 0; }
 
 /* "Show the Mongolian original" under a translated category-upgrade question. */
 .cu-original {

@@ -8,6 +8,7 @@
     "import:images": "node scripts/import-images.js",
     "convert:images": "node scripts/convert-images.js",
     "generate:data": "node scripts/generate-data.js",
+    "generate:regular-zh": "node scripts/generate-regular-zh.js",
     "validate": "node scripts/validate.js",
     "import:category-upgrade": "node scripts/import-category-upgrade.js",
     "generate:category-upgrade": "node scripts/generate-category-upgrade.js",

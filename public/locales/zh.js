@@ -90,6 +90,7 @@ I18N.register("zh", {
   "practice.answersAria": "答案选项",
   "practice.correct": "回答正确！🎉",
   "practice.wrong": "回答错误。正确答案：{answer}",
+  "practice.wrongWithText": "回答错误。正确答案：{answer}. {text}",
   "practice.prev": "← 上一题",
   "practice.next": "下一题 →",
   "practice.finish": "交卷 ✓",
