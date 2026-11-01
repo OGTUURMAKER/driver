@@ -175,6 +175,32 @@ async function run() {
   check("Case B — every referenced image resolves on disk", imageProblems === 0,
     `${imageProblems} missing`);
 
+  /* ---------- Chinese display layer ---------- */
+  // The API adds q.i18n.zh next to the Mongolian original; everything that
+  // marking depends on must be byte-for-byte what the source bank says.
+  const sourceBank = JSON.parse(
+    fs.readFileSync(path.join(ROOT, "data", "category-upgrade", "questions.json"), "utf8"));
+  let i18nServed = 0;
+  let i18nMisaligned = 0;
+  let sourceDrift = 0;
+  for (let t = 1; t <= 20; t += 1) {
+    const res = await request("GET", `/api/category-upgrade/tests/${t}`, { token: tokenUpgrade });
+    res.body.questions.forEach((q, i) => {
+      const src = sourceBank.tests[String(t)][i];
+      if (q.id !== src.id || q.question !== src.question || q.correctAnswer !== src.correctAnswer ||
+          JSON.stringify(q.options) !== JSON.stringify(src.options)) sourceDrift += 1;
+      if (q.i18n && q.i18n.zh) {
+        i18nServed += 1;
+        if (q.i18n.zh.options.length !== q.options.length || "correctAnswer" in q.i18n.zh) i18nMisaligned += 1;
+      }
+    });
+  }
+  check("i18n — Mongolian question, options, order and answers are served unchanged",
+    sourceDrift === 0, `${sourceDrift} question(s) differ from the source bank`);
+  check("i18n — all 200 questions carry a Chinese translation", i18nServed === 200, `got ${i18nServed}`);
+  check("i18n — every translation keeps the option count and carries no answer",
+    i18nMisaligned === 0, `${i18nMisaligned} misaligned`);
+
   const upgradeMe = await request("GET", "/api/student/me", { token: tokenUpgrade });
   check("Case B — the student gains no unrelated permission",
     JSON.stringify(upgradeMe.body.student.entitlements) === JSON.stringify(["category_upgrade"]));

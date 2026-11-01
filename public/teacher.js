@@ -4,6 +4,9 @@
   "use strict";
 
   const P = window.Platform;
+  const I18N = window.I18N;
+  const t = I18N.t;
+  I18N.boot();
   const token = localStorage.getItem("teacherToken") || "";
   if (!token) {
     location.href = "/login";
@@ -29,7 +32,7 @@
       return new Promise(() => {});
     }
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Алдаа гарлаа.");
+    if (!res.ok) throw new Error(I18N.serverMessage(data.error) || t("common.error"));
     return data;
   }
 
@@ -54,19 +57,19 @@
   }
 
   function fmtRelative(iso) {
-    if (!iso) return "Хэзээ ч";
+    if (!iso) return t("teacher.never");
     const sec = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
-    if (sec < 60) return "Дөнгөж сая";
-    if (sec < 3600) return Math.floor(sec / 60) + " мин өмнө";
-    if (sec < 86400) return Math.floor(sec / 3600) + " цаг өмнө";
-    return Math.floor(sec / 86400) + " хоног өмнө";
+    if (sec < 60) return t("teacher.justNow");
+    if (sec < 3600) return t("teacher.minutesAgo", { n: Math.floor(sec / 60) });
+    if (sec < 86400) return t("teacher.hoursAgo", { n: Math.floor(sec / 3600) });
+    return t("teacher.daysAgo", { n: Math.floor(sec / 86400) });
   }
 
   function fmtStudyTime(sec) {
-    if (!sec) return "0 мин";
+    if (!sec) return t("teacher.minutes", { m: 0 });
     const h = Math.floor(sec / 3600);
     const m = Math.round((sec % 3600) / 60);
-    return h ? h + " цаг " + m + " мин" : m + " мин";
+    return h ? t("teacher.hoursMinutes", { h, m }) : t("teacher.minutes", { m });
   }
 
   function isOnline(row) {
@@ -75,8 +78,8 @@
   }
 
   const ENTITLEMENT_LABELS = {
-    regular: "Дүрмийн тест",
-    category_upgrade: "Ангилал ахиулах"
+    regular: t("entitlement.regular"),
+    category_upgrade: t("entitlement.upgrade")
   };
 
   function entitlementPills(list) {
@@ -105,8 +108,12 @@
   }
 
   function statusPill(status, online) {
-    const labels = { active: "Идэвхтэй", expired: "Хугацаа дууссан", disabled: "Хаагдсан" };
-    return (online ? '<span class="online-dot" title="Онлайн"></span>' : "") +
+    const labels = {
+      active: t("teacher.statusActive"),
+      expired: t("teacher.statusExpired"),
+      disabled: t("teacher.statusDisabled")
+    };
+    return (online ? '<span class="online-dot" title="' + esc(t("teacher.online")) + '"></span>' : "") +
       '<span class="status-pill ' + status + '">' + labels[status] + "</span>";
   }
 
@@ -151,14 +158,14 @@
     const s = data.stats;
 
     const cards = [
-      ["👥", "", s.totalStudents, "Нийт сурагч"],
-      ["✅", "success", s.activeStudents, "Идэвхтэй эрхтэй"],
-      ["⏳", "accent", s.expiredStudents, "Хугацаа дууссан"],
-      ["🟢", "success", s.onlineNow, "Яг одоо онлайн"],
-      ["📅", "", s.activeToday, "Өнөөдөр идэвхтэй"],
-      ["🗓️", "", s.activeThisWeek, "Энэ 7 хоногт идэвхтэй"],
-      ["📝", "", s.totalExams, "Нийт шалгалт өгсөн"],
-      ["🎯", "accent", s.averageExamScore === null ? "—" : s.averageExamScore, "Шалгалтын дундаж / 20"]
+      ["👥", "", s.totalStudents, t("teacher.statTotal")],
+      ["✅", "success", s.activeStudents, t("teacher.statActive")],
+      ["⏳", "accent", s.expiredStudents, t("teacher.statExpired")],
+      ["🟢", "success", s.onlineNow, t("teacher.statOnline")],
+      ["📅", "", s.activeToday, t("teacher.statToday")],
+      ["🗓️", "", s.activeThisWeek, t("teacher.statWeek")],
+      ["📝", "", s.totalExams, t("teacher.statExams")],
+      ["🎯", "accent", s.averageExamScore === null ? "—" : s.averageExamScore, t("teacher.statExamAverage")]
     ];
     document.getElementById("overview-stats").innerHTML = cards.map(([icon, tone, value, label]) =>
       '<div class="card stat-card">' +
@@ -172,12 +179,11 @@
     if (data.expiringSoon.length) {
       banner.hidden = false;
       banner.innerHTML =
-        "⚠️ <strong>" + data.expiringSoon.length +
-        " сурагчийн эрх 7 хоногийн дотор дуусна:</strong><ul>" +
+        "⚠️ <strong>" + esc(t("teacher.expiring", { count: data.expiringSoon.length })) + "</strong><ul>" +
         data.expiringSoon.slice(0, 6).map((st) =>
           "<li>" + esc(st.name) + " — " + fmtDate(st.expiresAt) + " (" + esc(st.code) + ")</li>"
         ).join("") +
-        (data.expiringSoon.length > 6 ? "<li>… болон бусад</li>" : "") + "</ul>";
+        (data.expiringSoon.length > 6 ? "<li>" + esc(t("teacher.andMore")) + "</li>" : "") + "</ul>";
     } else {
       banner.hidden = true;
     }
@@ -187,7 +193,7 @@
     document.getElementById("exam-chart").innerHTML = days.map((day) => {
       const count = data.examsPerDay[day];
       const pct = Math.round((count / max) * 100);
-      return '<div class="chart-bar" title="' + day + ": " + count + ' шалгалт" style="height:' +
+      return '<div class="chart-bar" title="' + esc(t("teacher.chartBar", { day, count })) + '" style="height:' +
         Math.max(pct, 3) + '%">' + (count ? '<div class="bar-fill"></div>' : "") + "</div>";
     }).join("");
     document.getElementById("exam-chart-labels").innerHTML =
@@ -198,11 +204,11 @@
           '<div class="ranked-item">' +
             '<span class="ranked-num">' + (i + 1) + "</span>" +
             '<span class="ri-name">' + esc(row.name) + "</span>" +
-            '<span class="ri-meta">' + fmtStudyTime(row.studyTimeSec) + " · " +
-              row.examCount + " шалгалт</span>" +
+            '<span class="ri-meta">' +
+              esc(t("teacher.activeMeta", { time: fmtStudyTime(row.studyTimeSec), count: row.examCount })) + "</span>" +
           "</div>"
         ).join("")
-      : '<div class="empty-state" style="padding:20px">Идэвх бүртгэгдээгүй байна.</div>';
+      : '<div class="empty-state" style="padding:20px">' + esc(t("teacher.noActivity")) + "</div>";
   }
 
   /* ---------- students list ---------- */
@@ -239,7 +245,7 @@
     tbody.innerHTML = rows.map((row) =>
       '<tr data-id="' + row.id + '">' +
         '<td><div class="cell-name">' + esc(row.name) + '</div>' +
-          '<div class="cell-sub">' + esc(row.phone || "Утас бүртгээгүй") + "</div></td>" +
+          '<div class="cell-sub">' + esc(row.phone || t("teacher.noPhone")) + "</div></td>" +
         '<td><span class="code-pill">' + esc(row.code) + "</span>" +
           '<div class="cell-sub">' + entitlementPills(row.entitlements) + "</div></td>" +
         "<td>" + statusPill(row.status, isOnline(row)) + "</td>" +
@@ -250,12 +256,12 @@
           row.chaptersStarted + "/40)</span></td>" +
         "<td>" + (row.averageScore === null ? "—" : "<strong>" + row.averageScore + "</strong>/20") + "</td>" +
         '<td><div class="row-actions">' +
-          '<button class="mini-btn" data-action="view" type="button">Үзэх</button>' +
-          '<button class="mini-btn" data-action="extend" type="button">+30 хоног</button>' +
+          '<button class="mini-btn" data-action="view" type="button">' + esc(t("teacher.view")) + "</button>" +
+          '<button class="mini-btn" data-action="extend" type="button">' + esc(t("teacher.extendDays", { days: 30 })) + "</button>" +
           (row.status === "disabled"
-            ? '<button class="mini-btn" data-action="enable" type="button">Нээх</button>'
-            : '<button class="mini-btn danger" data-action="disable" type="button">Хаах</button>') +
-          '<button class="mini-btn danger" data-action="delete" type="button">Устгах</button>' +
+            ? '<button class="mini-btn" data-action="enable" type="button">' + esc(t("teacher.enable")) + "</button>"
+            : '<button class="mini-btn danger" data-action="disable" type="button">' + esc(t("teacher.disable")) + "</button>") +
+          '<button class="mini-btn danger" data-action="delete" type="button">' + esc(t("teacher.delete")) + "</button>" +
         "</div></td>" +
       "</tr>"
     ).join("");
@@ -302,21 +308,21 @@
           method: "POST",
           body: JSON.stringify({ days: 30 })
         });
-        toast("Эрхийг 30 хоногоор сунгалаа");
+        toast(t("teacher.toastExtended", { days: 30 }));
         await loadStudents();
       } else if (action === "disable") {
-        if (!confirm("Энэ сурагчийн хандах эрхийг түр хаах уу?")) return;
+        if (!confirm(t("teacher.confirmDisable"))) return;
         await api("/api/teacher/students/" + id + "/revoke", { method: "POST" });
-        toast("Хандах эрхийг хаалаа");
+        toast(t("teacher.toastDisabled"));
         await loadStudents();
       } else if (action === "enable") {
         await api("/api/teacher/students/" + id + "/enable", { method: "POST" });
-        toast("Хандах эрхийг нээлээ");
+        toast(t("teacher.toastEnabled"));
         await loadStudents();
       } else if (action === "delete") {
-        if (!confirm("Энэ сурагчийг бүх түүхтэй нь хамт устгах уу? Энэ үйлдлийг буцаах боломжгүй.")) return;
+        if (!confirm(t("teacher.confirmDelete"))) return;
         await api("/api/teacher/students/" + id, { method: "DELETE" });
-        toast("Сурагчийг устгалаа");
+        toast(t("teacher.toastDeleted"));
         await loadStudents();
       }
     } catch (error) {
@@ -355,7 +361,7 @@
       const reveal = document.getElementById("new-id-reveal");
       reveal.hidden = false;
       document.getElementById("new-id-code").textContent = data.student.code;
-      toast(data.student.name + " бүртгэгдлээ");
+      toast(t("teacher.toastRegistered", { name: data.student.name }));
       await loadStudents();
     } catch (error) {
       showError(error.message);
@@ -364,7 +370,7 @@
 
   document.getElementById("copy-id-btn").addEventListener("click", () => {
     navigator.clipboard.writeText(document.getElementById("new-id-code").textContent)
-      .then(() => toast("ID хуулагдлаа"));
+      .then(() => toast(t("teacher.toastCopied")));
   });
 
   /* ---------- student profile ---------- */
@@ -409,127 +415,134 @@
       const ch = byChapter[c];
       const cls = !ch || ch.bestScore === null ? "" : ch.bestScore >= 18 ? "pass" : "fail";
       const title = ch && ch.bestScore !== null
-        ? "Бүлэг " + c + ": шилдэг " + ch.bestScore + "/20, " + ch.attempts + " оролдлого"
-        : "Бүлэг " + c + ": эхлээгүй";
-      heat.push('<div class="heat-cell ' + cls + '" title="' + title + '">' + c + "</div>");
+        ? t("teacher.heatBest", { chapter: c, score: ch.bestScore, attempts: ch.attempts })
+        : t("teacher.heatNone", { chapter: c });
+      heat.push('<div class="heat-cell ' + cls + '" title="' + esc(title) + '">' + c + "</div>");
     }
 
     profileView.innerHTML =
       '<div class="profile-header">' +
-        '<button class="icon-btn" id="profile-back" type="button" aria-label="Буцах">←</button>' +
+        '<button class="icon-btn" id="profile-back" type="button" aria-label="' + esc(t("common.back")) + '">←</button>' +
         '<div class="avatar">' + esc(initials) + "</div>" +
         "<div><h2>" + esc(st.name) + "</h2>" +
-          '<div class="sub">' + esc(st.phone || "Утас бүртгээгүй") + " · Бүртгэсэн " + fmtDate(st.createdAt) + "</div></div>" +
+          '<div class="sub">' + esc(st.phone || t("teacher.noPhone")) + " · " +
+            esc(t("teacher.registeredOn", { date: fmtDate(st.createdAt) })) + "</div></div>" +
         "<div style='margin-left:auto'>" + statusPill(st.status, st.onlineNow) + "</div>" +
       "</div>" +
 
       '<div class="admin-stats-grid">' +
-        statCard("📈", "", sum.progressPercent + "%", "Явц (" + sum.chaptersStarted + "/40 бүлэг)") +
-        statCard("🎯", "", sum.averageScore === null ? "—" : sum.averageScore, "Дундаж оноо / 20") +
-        statCard("🏆", "success", sum.highestScore === null ? "—" : sum.highestScore, "Хамгийн өндөр оноо") +
-        statCard("📝", "", sum.examCount, "Шалгалт өгсөн") +
-        statCard("✅", "success", sum.examPassRate === null ? "—" : sum.examPassRate + "%", "Шалгалт тэнцсэн хувь") +
-        statCard("⏱️", "accent", fmtStudyTime(sum.studyTimeSec), "Нийт суралцсан хугацаа") +
-        statCard("🕐", "", fmtRelative(st.lastActivityAt || st.lastLoginAt), "Сүүлд идэвхтэй") +
-        statCard("📖", "", sum.lastChapter ? "Бүлэг " + sum.lastChapter : "—",
-          sum.currentQuestion ? "Одоо: асуулт " + sum.currentQuestion : "Сүүлийн бүлэг") +
+        statCard("📈", "", sum.progressPercent + "%", t("teacher.pProgress", { count: sum.chaptersStarted })) +
+        statCard("🎯", "", sum.averageScore === null ? "—" : sum.averageScore, t("teacher.pAverage")) +
+        statCard("🏆", "success", sum.highestScore === null ? "—" : sum.highestScore, t("teacher.pHighest")) +
+        statCard("📝", "", sum.examCount, t("teacher.pExams")) +
+        statCard("✅", "success", sum.examPassRate === null ? "—" : sum.examPassRate + "%", t("teacher.pPassRate")) +
+        statCard("⏱️", "accent", fmtStudyTime(sum.studyTimeSec), t("teacher.pStudyTime")) +
+        statCard("🕐", "", fmtRelative(st.lastActivityAt || st.lastLoginAt), t("teacher.pLastActive")) +
+        statCard("📖", "", sum.lastChapter ? t("chapter.name", { chapter: sum.lastChapter }) : "—",
+          sum.currentQuestion ? t("teacher.pCurrentQuestion", { n: sum.currentQuestion }) : t("teacher.pLastChapter")) +
         ((st.entitlements || []).indexOf("category_upgrade") !== -1 && st.categoryUpgrade
           ? statCard("🚚", "", st.categoryUpgrade.testsPassed + "/" + st.categoryUpgrade.totalTests,
-              "Ангилал ахиулах — тэнцсэн") +
+              t("teacher.pUpgradePassed")) +
             statCard("🎯", "",
               st.categoryUpgrade.averageScore === null ? "—" : st.categoryUpgrade.averageScore,
-              "Ангилал ахиулах — дундаж / " + st.categoryUpgrade.questionsPerTest)
+              t("teacher.pUpgradeAverage", { per: st.categoryUpgrade.questionsPerTest }))
           : "") +
       "</div>" +
 
       '<div class="profile-grid">' +
         '<div class="card">' +
-          '<h3 style="margin:0 0 12px">Хувийн мэдээлэл</h3>' +
+          '<h3 style="margin:0 0 12px">' + esc(t("teacher.personal")) + "</h3>" +
           '<dl class="kv-list">' +
-            "<dt>Access ID</dt><dd><span class='code-pill'>" + esc(st.code) +
+            "<dt>" + esc(t("teacher.colCode")) + "</dt><dd><span class='code-pill'>" + esc(st.code) +
               "</span> <button class='mini-btn' id='copy-profile-id' type='button'>📋</button></dd>" +
-            "<dt>Утас</dt><dd>" + esc(st.phone || "—") + "</dd>" +
-            "<dt>Бүртгэсэн</dt><dd>" + fmtDate(st.createdAt) + "</dd>" +
-            "<dt>Дуусах</dt><dd>" + fmtDate(st.expiresAt) + "</dd>" +
-            "<dt>Сүүлд нэвтэрсэн</dt><dd>" + fmtDateTime(st.lastLoginAt) + "</dd>" +
-            "<dt>Шалгалтын эрх</dt><dd>" + entitlementPills(st.entitlements) + "</dd>" +
-            "<dt>Тэмдэглэл</dt><dd>" + esc(st.notes || "—") + "</dd>" +
+            "<dt>" + esc(t("teacher.fieldPhone")) + "</dt><dd>" + esc(st.phone || "—") + "</dd>" +
+            "<dt>" + esc(t("teacher.colCreated")) + "</dt><dd>" + fmtDate(st.createdAt) + "</dd>" +
+            "<dt>" + esc(t("teacher.colExpires")) + "</dt><dd>" + fmtDate(st.expiresAt) + "</dd>" +
+            "<dt>" + esc(t("teacher.fieldLastLogin")) + "</dt><dd>" + fmtDateTime(st.lastLoginAt) + "</dd>" +
+            "<dt>" + esc(t("teacher.fieldEntitlements")) + "</dt><dd>" + entitlementPills(st.entitlements) + "</dd>" +
+            "<dt>" + esc(t("teacher.fieldNotes")) + "</dt><dd>" + esc(st.notes || "—") + "</dd>" +
           "</dl>" +
           '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">' +
-            '<button class="btn btn-soft" data-extend="30" type="button">+30 хоног</button>' +
-            '<button class="btn btn-soft" data-extend="60" type="button">+60 хоног</button>' +
-            '<button class="btn btn-soft" data-extend="90" type="button">+90 хоног</button>' +
-            '<button class="btn btn-ghost" id="profile-edit-btn" type="button">✏️ Засах</button>' +
+            [30, 60, 90].map((days) =>
+              '<button class="btn btn-soft" data-extend="' + days + '" type="button">' +
+                esc(t("teacher.extendDays", { days })) + "</button>").join("") +
+            '<button class="btn btn-ghost" id="profile-edit-btn" type="button">' + esc(t("teacher.edit")) + "</button>" +
             (st.status === "disabled"
-              ? '<button class="btn btn-ghost" id="profile-enable" type="button">Эрх нээх</button>'
-              : '<button class="btn btn-ghost" id="profile-disable" type="button">Эрх хаах</button>') +
+              ? '<button class="btn btn-ghost" id="profile-enable" type="button">' + esc(t("teacher.enableAccess")) + "</button>"
+              : '<button class="btn btn-ghost" id="profile-disable" type="button">' + esc(t("teacher.disableAccess")) + "</button>") +
           "</div>" +
           '<form id="profile-edit-form" class="form-grid" style="margin-top:16px" hidden>' +
-            '<label><span>Нэр</span><input name="name" value="' + esc(st.name) + '" minlength="2" required /></label>' +
-            '<label><span>Утас</span><input name="phone" value="' + esc(st.phone) + '" /></label>' +
-            '<label class="full"><span>Тэмдэглэл</span><input name="notes" value="' + esc(st.notes) + '" /></label>' +
+            "<label><span>" + esc(t("teacher.fieldName")) + '</span><input name="name" value="' + esc(st.name) + '" minlength="2" required /></label>' +
+            "<label><span>" + esc(t("teacher.fieldPhone")) + '</span><input name="phone" value="' + esc(st.phone) + '" /></label>' +
+            '<label class="full"><span>' + esc(t("teacher.fieldNotes")) + '</span><input name="notes" value="' + esc(st.notes) + '" /></label>' +
             '<div class="full"><span style="display:block;font-size:12px;font-weight:700;' +
-              'color:var(--text-muted);margin-bottom:8px">Шалгалтын эрх</span>' +
+              'color:var(--text-muted);margin-bottom:8px">' + esc(t("teacher.fieldEntitlements")) + "</span>" +
               '<div style="display:flex;gap:16px;flex-wrap:wrap">' +
                 entitlementFields(st.entitlements) +
               "</div></div>" +
-            '<div class="full"><button class="btn btn-primary" type="submit">Хадгалах</button></div>' +
+            '<div class="full"><button class="btn btn-primary" type="submit">' + esc(t("teacher.save")) + "</button></div>" +
           "</form>" +
           (st.extensions && st.extensions.length
-            ? '<h4 style="margin:18px 0 6px">Сунгалтын түүх</h4><ul class="timeline">' +
+            ? '<h4 style="margin:18px 0 6px">' + esc(t("teacher.extensions")) + '</h4><ul class="timeline">' +
               st.extensions.slice().reverse().map((ext) =>
                 "<li><span class='tl-time'>" + fmtDateTime(ext.createdAt) + "</span>" +
                 fmtDate(ext.from) + " → " + fmtDate(ext.to) +
-                (ext.days ? " (+" + ext.days + " хоног)" : "") + "</li>"
+                (ext.days ? esc(t("teacher.extensionDays", { days: ext.days })) : "") + "</li>"
               ).join("") + "</ul>"
             : "") +
         "</div>" +
 
         '<div class="card">' +
-          '<h3 style="margin:0 0 4px">Бүлгийн зураглал</h3>' +
-          '<p class="section-hint" style="margin:0">Ногоон = тэнцсэн (18+), улаан = дахин үзэх</p>' +
+          '<h3 style="margin:0 0 4px">' + esc(t("teacher.heatmap")) + "</h3>" +
+          '<p class="section-hint" style="margin:0">' + esc(t("teacher.heatLegend")) + "</p>" +
           '<div class="chapter-heatmap">' + heat.join("") + "</div>" +
           (sum.weakestChapters.length
-            ? '<h4 style="margin:16px 0 0">Сул бүлгүүд</h4><div class="chips">' +
+            ? '<h4 style="margin:16px 0 0">' + esc(t("teacher.weak")) + '</h4><div class="chips">' +
               sum.weakestChapters.map((ch) =>
-                '<span class="chip weak">Бүлэг ' + ch.chapterId + " · " + ch.bestScore + "/20</span>").join("") +
-              '</div><h4 style="margin:14px 0 0">Сайн бүлгүүд</h4><div class="chips">' +
+                '<span class="chip weak">' + esc(t("chapter.name", { chapter: ch.chapterId })) + " · " +
+                  ch.bestScore + "/20</span>").join("") +
+              '</div><h4 style="margin:14px 0 0">' + esc(t("teacher.strong")) + '</h4><div class="chips">' +
               sum.strongestChapters.map((ch) =>
-                '<span class="chip good">Бүлэг ' + ch.chapterId + " · " + ch.bestScore + "/20</span>").join("") +
+                '<span class="chip good">' + esc(t("chapter.name", { chapter: ch.chapterId })) + " · " +
+                  ch.bestScore + "/20</span>").join("") +
               "</div>"
             : "") +
         "</div>" +
 
         '<div class="card">' +
-          '<h3 style="margin:0 0 6px">Шалгалтын түүх</h3>' +
+          '<h3 style="margin:0 0 6px">' + esc(t("teacher.history")) + "</h3>" +
           (st.examResults.length
-            ? '<table class="history-table"><thead><tr><th>Огноо</th><th>Бүлэг</th><th>Оноо</th><th>Үр дүн</th><th>Хугацаа</th></tr></thead><tbody>' +
+            ? '<table class="history-table"><thead><tr>' +
+                ["teacher.colDate", "teacher.colChapter", "teacher.colScore", "teacher.colResult", "teacher.colDuration"]
+                  .map((key) => "<th>" + esc(t(key)) + "</th>").join("") +
+              "</tr></thead><tbody>" +
               st.examResults.map((exam) =>
-                "<tr><td>" + fmtDateTime(exam.date) + "</td><td>Бүлэг " + exam.chapterId + "</td>" +
+                "<tr><td>" + fmtDateTime(exam.date) + "</td><td>" +
+                  esc(t("chapter.name", { chapter: exam.chapterId })) + "</td>" +
                 "<td><strong>" + exam.score + "</strong>/" + exam.total + "</td>" +
                 "<td>" + (exam.score >= 18
-                  ? '<span class="status-pill active">Тэнцсэн</span>'
-                  : '<span class="status-pill expired">Тэнцээгүй</span>') + "</td>" +
+                  ? '<span class="status-pill active">' + esc(t("teacher.resultPassed")) + "</span>"
+                  : '<span class="status-pill expired">' + esc(t("teacher.resultFailed")) + "</span>") + "</td>" +
                 "<td>" + fmtStudyTime(exam.durationSec) + "</td></tr>"
               ).join("") + "</tbody></table>"
-            : '<div class="empty-state" style="padding:18px">Шалгалт өгөөгүй байна.</div>') +
+            : '<div class="empty-state" style="padding:18px">' + esc(t("teacher.noExams")) + "</div>") +
         "</div>" +
 
         '<div class="card">' +
-          '<h3 style="margin:0 0 6px">Үйл ажиллагааны түүх</h3>' +
+          '<h3 style="margin:0 0 6px">' + esc(t("teacher.timeline")) + "</h3>" +
           (st.activityTimeline.length
             ? '<ul class="timeline">' +
               st.activityTimeline.map((item) =>
                 "<li><span class='tl-time'>" + fmtDateTime(item.createdAt) + "</span>" +
-                esc(item.summary) + "</li>").join("") + "</ul>"
-            : '<div class="empty-state" style="padding:18px">Идэвх бүртгэгдээгүй.</div>') +
+                esc(I18N.activity(item.summary)) + "</li>").join("") + "</ul>"
+            : '<div class="empty-state" style="padding:18px">' + esc(t("teacher.noTimeline")) + "</div>") +
         "</div>" +
       "</div>";
 
     /* profile event wiring */
     document.getElementById("profile-back").addEventListener("click", closeProfile);
     document.getElementById("copy-profile-id").addEventListener("click", () => {
-      navigator.clipboard.writeText(st.code).then(() => toast("ID хуулагдлаа"));
+      navigator.clipboard.writeText(st.code).then(() => toast(t("teacher.toastCopied")));
     });
     profileView.querySelectorAll("[data-extend]").forEach((btn) => {
       btn.addEventListener("click", async () => {
@@ -538,7 +551,7 @@
             method: "POST",
             body: JSON.stringify({ days: Number(btn.dataset.extend) })
           });
-          toast("Эрхийг " + btn.dataset.extend + " хоногоор сунгалаа");
+          toast(t("teacher.toastExtended", { days: btn.dataset.extend }));
           openProfile(st.id);
         } catch (error) { showError(error.message); }
       });
@@ -559,17 +572,17 @@
             entitlements: readEntitlements(editForm)
           })
         });
-        toast("Хадгалагдлаа");
+        toast(t("teacher.toastSaved"));
         openProfile(st.id);
       } catch (error) { showError(error.message); }
     });
     const disableBtn = document.getElementById("profile-disable");
     if (disableBtn) {
       disableBtn.addEventListener("click", async () => {
-        if (!confirm("Энэ сурагчийн хандах эрхийг түр хаах уу?")) return;
+        if (!confirm(t("teacher.confirmDisable"))) return;
         try {
           await api("/api/teacher/students/" + st.id + "/revoke", { method: "POST" });
-          toast("Хандах эрхийг хаалаа");
+          toast(t("teacher.toastDisabled"));
           openProfile(st.id);
         } catch (error) { showError(error.message); }
       });
@@ -579,7 +592,7 @@
       enableBtn.addEventListener("click", async () => {
         try {
           await api("/api/teacher/students/" + st.id + "/enable", { method: "POST" });
-          toast("Хандах эрхийг нээлээ");
+          toast(t("teacher.toastEnabled"));
           openProfile(st.id);
         } catch (error) { showError(error.message); }
       });

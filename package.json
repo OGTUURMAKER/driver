@@ -13,7 +13,8 @@
     "generate:category-upgrade": "node scripts/generate-category-upgrade.js",
     "validate:category-upgrade": "node scripts/validate-category-upgrade.js",
     "test:category-upgrade": "node scripts/test-category-upgrade.js",
-    "validate:all": "npm run validate && npm run validate:category-upgrade",
+    "validate:i18n": "node scripts/validate-i18n.js",
+    "validate:all": "npm run validate && npm run validate:category-upgrade && npm run validate:i18n",
     "test": "node scripts/test-category-upgrade.js"
   },
   "license": "MIT",

@@ -4,6 +4,9 @@
   "use strict";
 
   const P = window.Platform;
+  const I18N = window.I18N;
+  const t = I18N.t;
+  I18N.boot();
 
   /* Theme toggle */
   const themeBtn = document.getElementById("theme-toggle");
@@ -25,16 +28,16 @@
       Object.keys(ch.session.answers).length > 0;
 
     let badgeClass = "";
-    let badgeText = "Эхлээгүй";
+    let badgeText = t("badge.notStarted");
     if (best !== null && best >= P.PASS_SCORE) {
       badgeClass = "passed";
-      badgeText = "Тэнцсэн";
+      badgeText = t("badge.passed");
     } else if (best !== null) {
       badgeClass = "failed";
-      badgeText = "Дахин үзэх";
+      badgeText = t("badge.retry");
     } else if (hasSession) {
       badgeClass = "progress";
-      badgeText = "Үргэлжилж буй";
+      badgeText = t("badge.inProgress");
     }
 
     const percent = best !== null
@@ -46,15 +49,17 @@
     const card = document.createElement("a");
     card.className = "chapter-card";
     card.href = "/practice?chapter=" + chapterId;
-    card.setAttribute("aria-label",
-      "Бүлэг " + chapterId + " — " + badgeText + (best !== null ? ", шилдэг оноо " + best + "/20" : ""));
+    const name = t("chapter.name", { chapter: chapterId });
+    card.setAttribute("aria-label", best !== null
+      ? t("card.ariaBest", { name, status: badgeText, score: best, total: 20 })
+      : t("card.aria", { name, status: badgeText }));
     card.innerHTML =
       '<div class="chapter-card-top">' +
-        '<span class="chapter-number">Бүлэг ' + chapterId + "</span>" +
+        '<span class="chapter-number">' + name + "</span>" +
         '<span class="chapter-badge ' + badgeClass + '">' + badgeText + "</span>" +
       "</div>" +
       '<div class="chapter-score">' +
-        (best !== null ? "Шилдэг: " + best + "/20" : "20 асуулт") +
+        (best !== null ? t("card.best", { score: best, total: 20 }) : t("card.questions", { count: 20 })) +
       "</div>" +
       '<div class="chapter-bar"><div class="chapter-bar-fill' +
         (best !== null && best >= P.PASS_SCORE ? " passed" : "") +
@@ -79,14 +84,17 @@
     bar.setAttribute("aria-valuenow", String(summary.completionPercent));
     label.textContent =
       summary.completedChapters === 0
-        ? "Анхны бүлгээ эхлүүлээрэй — амжилт хүсье!"
-        : summary.completionPercent + "% гүйцэтгэсэн · " +
-          summary.completedChapters + "/" + P.TOTAL_CHAPTERS + " бүлэг";
+        ? t("home.firstChapter")
+        : t("home.progressDone", {
+            percent: summary.completionPercent,
+            done: summary.completedChapters,
+            total: P.TOTAL_CHAPTERS
+          });
 
     const continueBtn = document.getElementById("continue-btn");
     if (progress.lastChapter) {
       continueBtn.href = "/practice?chapter=" + progress.lastChapter;
-      continueBtn.textContent = "Үргэлжлүүлэх — Бүлэг " + progress.lastChapter;
+      continueBtn.textContent = t("home.continue", { chapter: progress.lastChapter });
     }
 
     const grid = document.getElementById("chapter-grid");
@@ -139,10 +147,10 @@
       const a = document.createElement("a");
       a.href = "/";
       a.className = "active";
-      a.textContent = "Дүрмийн тест";
+      a.textContent = t("entitlement.regular");
       const b = document.createElement("a");
       b.href = "/category-upgrade";
-      b.textContent = "Ангилал ахиулах";
+      b.textContent = t("entitlement.upgrade");
       nav.appendChild(a);
       nav.appendChild(b);
       nav.hidden = false;

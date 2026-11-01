@@ -1,0 +1,5 @@
+{
+  "_about": "Optional Simplified Chinese display layer for the 40-chapter bank (public/data/questions.json). The questions there are images with the Mongolian text printed in them, so this file is empty until each chapter is transcribed and translated. Keys are question ids from questions.json; options are in the same order as the numbered choices printed on the image. correctAnswer is never stored here — scoring always uses questions.json.",
+  "language": "zh-CN",
+  "questions": {}
+}

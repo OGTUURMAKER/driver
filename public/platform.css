@@ -6,6 +6,9 @@
 :root {
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+  /* Chinese glyphs: prefer each platform's native Simplified Chinese face */
+  --font-zh: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "Noto Sans SC", "Noto Sans CJK SC", "Segoe UI", Roboto, Arial, sans-serif;
 
   --bg: #f6f7fb;
   --bg-elevated: #ffffff;
@@ -72,6 +75,8 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
+html[lang="zh-CN"] body { font-family: var(--font-zh); }
+
 body {
   margin: 0;
   font-family: var(--font-sans);
@@ -130,24 +135,93 @@ a { color: var(--primary); text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 10px;
-  font-weight: 700;
-  font-size: 17px;
+  min-width: 0;
   color: var(--text);
+  text-decoration: none;
 }
 
-.brand-mark {
-  width: 36px;
-  height: 36px;
+.brand-logo {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
   border-radius: 11px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-strong));
-  color: #fff;
-  display: grid;
-  place-items: center;
-  font-size: 18px;
   box-shadow: var(--shadow-sm);
 }
 
-.topbar-actions { display: flex; align-items: center; gap: 8px; }
+.brand-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.15; }
+
+.brand-name {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.brand-tag {
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+
+.topbar-actions .mode-chip { max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+
+/* Narrow phones: the name wraps onto two lines, the tagline and the
+   student-name chip give way so the controls never overflow. */
+@media (max-width: 600px) {
+  .brand-tag { display: none; }
+  .brand-name { font-size: 14px; white-space: normal; max-width: 9.5em; }
+  .brand-logo { width: 36px; height: 36px; }
+  .topbar { gap: 8px; }
+  .topbar-actions { gap: 6px; }
+  .topbar-actions .icon-btn { width: 38px; height: 38px; font-size: 16px; }
+  .topbar-actions .mode-chip { max-width: 92px; }
+}
+
+@media (max-width: 440px) {
+  .topbar-actions .mode-chip { display: none; }
+}
+
+/* ---------- Language switch (MN / 中文) ---------- */
+
+.lang-switch {
+  display: inline-flex;
+  flex: 0 0 auto;
+  padding: 3px;
+  gap: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+}
+
+.lang-switch button {
+  min-width: 38px;
+  height: 34px;
+  padding: 0 9px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+}
+
+.lang-switch button:hover { color: var(--text); }
+
+.lang-switch button[aria-pressed="true"] {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+@media (max-width: 600px) {
+  .lang-switch { padding: 2px; }
+  .lang-switch button { min-width: 34px; height: 32px; padding: 0 7px; font-size: 12px; }
+}
+
 
 /* ---------- Buttons ---------- */
 
@@ -1261,3 +1335,59 @@ a { color: var(--primary); text-decoration: none; }
   background: transparent;
   color: inherit;
 }
+
+/* ---------- Brand / localization additions ---------- */
+
+.practice-logo { width: 34px; height: 34px; border-radius: 9px; }
+
+@media (max-width: 600px) {
+  .practice-logo { display: none; }
+  .practice-topbar { gap: 8px; }
+  .practice-topbar .icon-btn { width: 38px; height: 38px; font-size: 16px; }
+  .practice-topbar .mode-chip { padding: 5px 9px; }
+}
+
+/* Translation shown under an image-only question (never replaces it). */
+.question-translation {
+  margin: 0 14px 4px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-subtle);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.question-translation .qt-label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--primary);
+  margin-bottom: 4px;
+}
+
+.question-translation .qt-question { margin: 0 0 6px; font-weight: 600; }
+.question-translation .qt-options { margin: 0; padding-left: 22px; }
+.question-translation .qt-note { margin: 0; font-size: 13px; color: var(--text-secondary); }
+
+/* "Show the Mongolian original" under a translated category-upgrade question. */
+.cu-original {
+  margin: 0 18px 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.cu-original summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-muted);
+  list-style-position: inside;
+}
+
+.cu-original p { margin: 6px 0 0; }
+.cu-original ol { margin: 4px 0 0; padding-left: 22px; }
+
+@media (min-width: 540px) {
+  .cu-original { margin: 0 20px 10px; }
+}
+
+.mistake-item .cu-original { margin: 4px 0 8px; }

@@ -3,15 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Нэвтрэх — Жолооны дүрмийн тест</title>
+    <title data-i18n="title.login">Нэвтрэх — Адуун Чулууны Нуруу</title>
+    <link rel="icon" type="image/svg+xml" href="/public/assets/brand/logo-mark.svg?v=1" />
     <link rel="stylesheet" href="/public/platform.css" />
+    <script src="/public/i18n.js"></script>
+    <script src="/public/locales/mn.js"></script>
+    <script src="/public/locales/zh.js"></script>
     <script src="/public/platform.js"></script>
     <style>
       .login-shell {
         max-width: 440px;
         margin: 0 auto;
-        padding: 40px 18px 60px;
+        padding: 16px 18px 60px;
       }
+      .login-top { display: flex; justify-content: flex-end; margin-bottom: 18px; }
       .login-brand {
         display: flex;
         flex-direction: column;
@@ -20,8 +25,9 @@
         margin-bottom: 26px;
         text-align: center;
       }
-      .login-brand .brand-mark { width: 56px; height: 56px; font-size: 28px; border-radius: 16px; }
-      .login-brand h1 { margin: 0; font-size: 22px; }
+      .login-brand .brand-logo { width: 76px; height: 76px; border-radius: 20px; box-shadow: var(--shadow-md); }
+      .login-brand h1 { margin: 4px 0 0; font-size: 24px; font-weight: 800; letter-spacing: -0.01em; }
+      .login-brand .brand-tag { display: block; margin: -6px 0 0; font-size: 12px; letter-spacing: 0.08em; }
       .login-brand p { margin: 0; color: var(--text-secondary); font-size: 14px; }
       .login-card { padding: 26px 22px; }
       .login-card h2 { margin: 0 0 4px; font-size: 17px; }
@@ -77,22 +83,25 @@
   </head>
   <body>
     <div class="login-shell">
+      <div class="login-top"><div data-lang-switch></div></div>
+
       <div class="login-brand">
-        <span class="brand-mark" aria-hidden="true">🚗</span>
-        <h1>Жолооны дүрмийн тест</h1>
-        <p>40 бүлэг · 800 асуулт · Сургалт ба шалгалтын горим</p>
+        <img class="brand-logo" src="/public/assets/brand/logo-mark.svg?v=1" width="76" height="76" alt="" />
+        <h1>Адуун Чулууны Нуруу</h1>
+        <span class="brand-tag" data-i18n="brand.tagline">Жолоочийн сургалтын төв</span>
+        <p data-i18n="login.subtitle">Жолооны дүрмийн тест · Сургалт ба шалгалтын горим</p>
       </div>
 
-      <div class="expired-banner" id="expired-banner" hidden>
+      <div class="expired-banner" id="expired-banner" data-i18n="server.accessExpired" hidden>
         Таны хандах эрхийн хугацаа дууссан байна. Багштайгаа холбогдоно уу.
       </div>
 
       <div class="card login-card">
-        <h2>Сурагчийн нэвтрэлт</h2>
-        <p class="hint">Багшаас өгсөн Special Access ID-аа оруулна уу.</p>
+        <h2 data-i18n="login.studentTitle">Сурагчийн нэвтрэлт</h2>
+        <p class="hint" data-i18n="login.studentHint">Багшаас өгсөн Special Access ID-аа оруулна уу.</p>
         <form id="student-login-form">
           <label class="field">
-            <span>Special Access ID</span>
+            <span data-i18n="login.codeLabel">Special Access ID</span>
             <input
               class="access-input"
               type="text"
@@ -104,24 +113,24 @@
               required
             />
           </label>
-          <button class="btn btn-primary" type="submit">Нэвтрэх</button>
+          <button class="btn btn-primary" type="submit" data-i18n="login.submit">Нэвтрэх</button>
         </form>
         <div class="message" id="student-message" role="alert"></div>
       </div>
 
-      <button class="teacher-toggle" id="teacher-toggle" type="button">
+      <button class="teacher-toggle" id="teacher-toggle" type="button" data-i18n="login.teacherToggle">
         Багш / Админ нэвтрэлт →
       </button>
 
       <div class="card login-card" id="teacher-card" hidden>
-        <h2>Багшийн нэвтрэлт</h2>
-        <p class="hint">Удирдлагын самбарт нэвтрэх нууц үгээ оруулна уу.</p>
+        <h2 data-i18n="login.teacherTitle">Багшийн нэвтрэлт</h2>
+        <p class="hint" data-i18n="login.teacherHint">Удирдлагын самбарт нэвтрэх нууц үгээ оруулна уу.</p>
         <form id="teacher-login-form">
           <label class="field">
-            <span>Нууц үг</span>
+            <span data-i18n="login.password">Нууц үг</span>
             <input type="password" name="password" autocomplete="current-password" required />
           </label>
-          <button class="btn btn-soft" type="submit">Удирдлагын самбар руу орох</button>
+          <button class="btn btn-soft" type="submit" data-i18n="login.teacherSubmit">Удирдлагын самбар руу орох</button>
         </form>
         <div class="message" id="teacher-message" role="alert"></div>
       </div>

@@ -3,63 +3,71 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Ангилал ахиулах шалгалтын бэлтгэл — 20 тест, 200 асуулт" />
-    <title>Ангилал ахиулах — 20 тест, 200 асуулт</title>
+    <meta name="description" data-i18n-attr="content:meta.upgrade" content="Адуун Чулууны Нуруу — ангилал ахиулах шалгалтын бэлтгэл, 20 тест, 200 асуулт" />
+    <title data-i18n="title.upgrade">Ангилал ахиулах — Адуун Чулууны Нуруу</title>
+    <link rel="icon" type="image/svg+xml" href="/public/assets/brand/logo-mark.svg?v=1" />
     <link rel="stylesheet" href="/public/platform.css" />
+    <script src="/public/i18n.js"></script>
+    <script src="/public/locales/mn.js"></script>
+    <script src="/public/locales/zh.js"></script>
     <script src="/public/platform.js"></script>
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">🚚</span>
-          <span>Ангилал ахиулах</span>
-        </div>
+        <a class="brand" href="/">
+          <img class="brand-logo" src="/public/assets/brand/logo-mark.svg?v=1" width="40" height="40" alt="" />
+          <span class="brand-text">
+            <span class="brand-name">Адуун Чулууны Нуруу</span>
+            <span class="brand-tag" data-i18n="brand.tagline">Жолоочийн сургалтын төв</span>
+          </span>
+        </a>
         <div class="topbar-actions">
           <span class="mode-chip" id="student-chip" hidden></span>
-          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих">🌙</button>
-          <button id="logout-btn" class="icon-btn" type="button" aria-label="Гарах" title="Гарах">⏻</button>
+          <div data-lang-switch></div>
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих" data-i18n-attr="aria-label:common.themeToggle">🌙</button>
+          <button id="logout-btn" class="icon-btn" type="button" aria-label="Гарах" title="Гарах" data-i18n-attr="aria-label:common.logout; title:common.logout">⏻</button>
         </div>
       </header>
 
       <main>
-        <nav class="exam-switch" id="exam-switch" aria-label="Шалгалтын хэсэг"></nav>
+        <nav class="exam-switch" id="exam-switch" aria-label="Шалгалтын хэсэг" data-i18n-attr="aria-label:nav.examSwitch"></nav>
 
         <section class="hero-card" aria-labelledby="hero-title">
-          <p class="hero-eyebrow">Ангилал ахиулах шалгалт</p>
-          <h1 class="hero-title" id="hero-title">Ангилал ахиулахад бэлдье</h1>
-          <p class="hero-sub" id="hero-sub">20 тест · 10 асуулт тус бүр</p>
-          <div class="hero-progress-track" role="progressbar" aria-label="Нийт явц"
+          <p class="hero-eyebrow" data-i18n="upgrade.eyebrow">Ангилал ахиулах шалгалт</p>
+          <h1 class="hero-title" id="hero-title" data-i18n="upgrade.title">Ангилал ахиулахад бэлдье</h1>
+          <p class="hero-sub" id="hero-sub" data-i18n="home.upgradeHint">20 тест · 10 асуулт тус бүр</p>
+          <div class="hero-progress-track" role="progressbar" aria-label="Нийт явц" data-i18n-attr="aria-label:common.progressAria"
                aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hero-progressbar">
             <div class="hero-progress-fill" id="hero-progress-fill"></div>
           </div>
-          <p class="hero-progress-label" id="hero-progress-label">Явц тооцоолж байна…</p>
+          <p class="hero-progress-label" id="hero-progress-label" data-i18n="common.progressLoading">Явц тооцоолж байна…</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" id="continue-btn" href="/category-upgrade/practice?test=1">Тест эхлүүлэх</a>
-            <a class="btn btn-ghost" href="#tests">Тестүүдийг харах</a>
+            <a class="btn btn-primary" id="continue-btn" href="/category-upgrade/practice?test=1" data-i18n="upgrade.start">Тест эхлүүлэх</a>
+            <a class="btn btn-ghost" href="#tests" data-i18n="upgrade.viewTests">Тестүүдийг харах</a>
           </div>
         </section>
 
-        <section class="stats-grid" aria-label="Статистик">
+        <section class="stats-grid" aria-label="Статистик" data-i18n-attr="aria-label:common.statsAria">
           <div class="card stat-card">
             <div class="stat-icon" aria-hidden="true">📝</div>
             <div class="stat-value" id="stat-started">—</div>
-            <div class="stat-label" id="stat-started-label">Тест эхэлсэн</div>
+            <div class="stat-label" id="stat-started-label" data-i18n="upgrade.statStarted">Тест эхэлсэн</div>
           </div>
           <div class="card stat-card">
             <div class="stat-icon success" aria-hidden="true">✅</div>
             <div class="stat-value" id="stat-passed">—</div>
-            <div class="stat-label" id="stat-passed-label">Тэнцсэн тест</div>
+            <div class="stat-label" id="stat-passed-label" data-i18n="upgrade.statPassed">Тэнцсэн тест</div>
           </div>
           <div class="card stat-card">
             <div class="stat-icon" aria-hidden="true">🎯</div>
             <div class="stat-value" id="stat-average">—</div>
-            <div class="stat-label">Дундаж оноо / 10</div>
+            <div class="stat-label" data-i18n="upgrade.statAverage">Дундаж оноо / 10</div>
           </div>
           <div class="card stat-card">
             <div class="stat-icon accent" aria-hidden="true">🔁</div>
             <div class="stat-value" id="stat-attempts">—</div>
-            <div class="stat-label">Нийт оролдлого</div>
+            <div class="stat-label" data-i18n="upgrade.statAttempts">Нийт оролдлого</div>
           </div>
         </section>
 
@@ -67,8 +75,8 @@
 
         <section aria-labelledby="tests-title" id="tests">
           <div class="section-header">
-            <h2 class="section-title" id="tests-title">Бүх тестүүд</h2>
-            <span class="section-hint">10 асуулт тус бүр</span>
+            <h2 class="section-title" id="tests-title" data-i18n="upgrade.allTests">Бүх тестүүд</h2>
+            <span class="section-hint" data-i18n="upgrade.perTest">10 асуулт тус бүр</span>
           </div>
           <div class="chapter-grid" id="test-grid">
             <div class="skeleton-card"></div>
@@ -80,7 +88,7 @@
       </main>
 
       <footer class="footer-links">
-        <a href="/login">Багш / Сурагчийн нэвтрэлт</a>
+        <a href="/login" data-i18n="footer.login">Багш / Сурагчийн нэвтрэлт</a>
       </footer>
     </div>
 

@@ -87,13 +87,20 @@
       .catch(() => {}); // offline — instructor view updates on next sync
   }
 
-  /** Authenticated JSON GET; throws with the server's Mongolian message. */
+  /** Server errors arrive in Mongolian; show them in the reader's language. */
+  function localizeError(message, status) {
+    const I = window.I18N;
+    if (!I) return message || "Алдаа гарлаа (" + status + ")";
+    return message ? I.serverMessage(message) : I.t("common.errorStatus", { status });
+  }
+
+  /** Authenticated JSON GET; throws with the server's (localized) message. */
   function apiGet(path) {
     return fetch(path, { headers: { Authorization: "Bearer " + studentToken() }, cache: "no-store" })
       .then(async (res) => {
         const data = await res.json().catch(() => ({}));
         if (res.status === 401) { logout(); return new Promise(() => {}); }
-        if (!res.ok) throw new Error(data.error || "Алдаа гарлаа (" + res.status + ")");
+        if (!res.ok) throw new Error(localizeError(data.error, res.status));
         return data;
       });
   }
@@ -110,7 +117,7 @@
     }).then(async (res) => {
       const data = await res.json().catch(() => ({}));
       if (res.status === 401) { logout(); return new Promise(() => {}); }
-      if (!res.ok) throw new Error(data.error || "Алдаа гарлаа (" + res.status + ")");
+      if (!res.ok) throw new Error(localizeError(data.error, res.status));
       return data;
     });
   }
@@ -150,7 +157,11 @@
       // ?v= busts force-cached copies when the dataset changes (v2: WebP images)
       questionsPromise = fetch("/public/data/questions.json?v=3", { cache: "no-store" })
         .then((res) => {
-          if (!res.ok) throw new Error("Асуултын өгөгдөл ачаалагдсангүй (" + res.status + ")");
+          if (!res.ok) {
+            throw new Error(window.I18N
+              ? window.I18N.t("practice.dataFailed", { status: res.status })
+              : "Асуултын өгөгдөл ачаалагдсангүй (" + res.status + ")");
+          }
           return res.json();
         })
         .catch((err) => {

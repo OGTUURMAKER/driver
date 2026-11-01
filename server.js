@@ -85,6 +85,51 @@ function categoryUpgradeTest(testNumber) {
   return Array.isArray(list) ? list : null;
 }
 
+// ---------- Display translations for "Ангилал ахиулах" ----------
+// data/category-upgrade/translations.<lang>.json holds { questions: { id:
+// { question, options[] } } }. They are a presentation layer only: attached
+// to the API response next to the Mongolian original, never used for marking.
+const CATEGORY_UPGRADE_TRANSLATION_LANGS = ["zh"];
+let categoryUpgradeTranslations = null;
+
+function loadCategoryUpgradeTranslations() {
+  if (categoryUpgradeTranslations) return categoryUpgradeTranslations;
+  categoryUpgradeTranslations = {};
+  for (const lang of CATEGORY_UPGRADE_TRANSLATION_LANGS) {
+    const file = path.join(__dirname, "data", "category-upgrade", `translations.${lang}.json`);
+    try {
+      const doc = JSON.parse(fs.readFileSync(file, "utf8"));
+      categoryUpgradeTranslations[lang] = (doc && doc.questions) || {};
+    } catch (error) {
+      if (error.code !== "ENOENT") {
+        console.error(`Ангилал ахиулах орчуулга (${lang}) уншигдсангүй:`, error.message);
+      }
+      categoryUpgradeTranslations[lang] = {};
+    }
+  }
+  return categoryUpgradeTranslations;
+}
+
+/** Copies each question and adds i18n[lang] where a well-formed translation exists. */
+function withCategoryUpgradeTranslations(questions) {
+  const translations = loadCategoryUpgradeTranslations();
+  return questions.map((q) => {
+    const i18n = {};
+    for (const lang of Object.keys(translations)) {
+      const entry = translations[lang][q.id];
+      if (
+        entry &&
+        typeof entry.question === "string" &&
+        Array.isArray(entry.options) &&
+        entry.options.length === q.options.length
+      ) {
+        i18n[lang] = { question: entry.question, options: entry.options.slice() };
+      }
+    }
+    return Object.keys(i18n).length ? { ...q, i18n } : q;
+  });
+}
+
 const chapterTwoQuizzes = [
   {
     id: "2.1",
@@ -2467,7 +2512,7 @@ const server = http.createServer(async (req, res) => {
         testNumber,
         version: bank.version,
         passScore: CATEGORY_UPGRADE_PASS_SCORE,
-        questions
+        questions: withCategoryUpgradeTranslations(questions)
       });
       return;
     }

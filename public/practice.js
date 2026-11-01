@@ -4,6 +4,9 @@
   "use strict";
 
   const P = window.Platform;
+  const I18N = window.I18N;
+  const t = I18N.t;
+  I18N.boot();
   const params = new URLSearchParams(location.search);
   const chapterId = Math.min(Math.max(parseInt(params.get("chapter"), 10) || 1, 1), P.TOTAL_CHAPTERS);
   let mode = params.get("mode") === "exam" ? "exam" : params.get("mode") === "learning" ? "learning" : null;
@@ -18,6 +21,7 @@
   let finished = false;
   let timerInterval = null;
   let advanceTimeout = null;
+  let translations = {}; // question id → { question, options } (display only)
 
   /* ---------- Elements ---------- */
   const el = {
@@ -41,6 +45,7 @@
     modeOverlay: document.getElementById("mode-overlay"),
     modeChapterLabel: document.getElementById("mode-chapter-label"),
     examTimer: document.getElementById("exam-timer"),
+    translation: document.getElementById("question-translation"),
     themeToggle: document.getElementById("theme-toggle")
   };
 
@@ -50,9 +55,10 @@
   el.themeToggle.addEventListener("click", () => { P.toggleTheme(); syncThemeIcon(); });
   syncThemeIcon();
 
-  el.chapterTitle.textContent = "Бүлэг " + chapterId;
-  el.modeChapterLabel.textContent = "Бүлэг " + chapterId + " · 20 асуулт";
-  document.title = "Бүлэг " + chapterId + " — Жолооны дүрмийн тест";
+  el.chapterTitle.textContent = t("chapter.name", { chapter: chapterId });
+  el.counter.textContent = t("practice.counterPlaceholder", { total: P.QUESTIONS_PER_CHAPTER });
+  el.modeChapterLabel.textContent = t("practice.modeChapterLabel", { chapter: chapterId });
+  document.title = t("title.chapter", { chapter: chapterId });
 
   /* ---------- Session persistence ---------- */
 
@@ -86,14 +92,15 @@
 
   function renderQuestion() {
     const q = currentQuestion();
-    el.counter.textContent = "Асуулт " + (index + 1) + " / " + questions.length;
-    el.questionLabel.textContent = "Асуулт " + (index + 1);
+    el.counter.textContent = t("practice.counter", { n: index + 1, total: questions.length });
+    el.questionLabel.textContent = t("practice.question", { n: index + 1 });
 
     el.skeleton.classList.remove("hidden");
     el.image.classList.remove("loaded");
     el.image.src = q.imagePath;
-    el.image.alt = "Бүлэг " + chapterId + ", асуулт " + q.questionNumber + "-ийн зураг";
+    el.image.alt = t("practice.imageAltChapter", { chapter: chapterId, n: q.questionNumber });
     if (el.image.complete && el.image.naturalWidth) onImageLoad();
+    renderTranslation(q);
 
     const selected = answers[q.questionNumber];
     const revealed = mode === "learning" && selected !== undefined;
@@ -119,13 +126,13 @@
       const good = selected === q.correctAnswer;
       el.feedback.classList.add("show", good ? "good" : "bad");
       el.feedback.textContent = good
-        ? "Зөв байна! 🎉"
-        : "Буруу байна. Зөв хариулт: " + q.correctAnswer;
+        ? t("practice.correct")
+        : t("practice.wrong", { answer: q.correctAnswer });
     }
 
     el.prevBtn.disabled = index === 0;
     const last = index === questions.length - 1;
-    el.nextBtn.textContent = last ? "Дуусгах ✓" : "Дараах →";
+    el.nextBtn.textContent = last ? t("practice.finish") : t("practice.next");
 
     el.progressFill.style.width = (answeredCount() / questions.length) * 100 + "%";
     el.progressBar.setAttribute("aria-valuenow", String(answeredCount()));
@@ -135,6 +142,45 @@
     preload(index + 2);
   }
 
+  /* The question itself is printed in the image (Mongolian). In Chinese the
+     translated text is shown underneath when the overlay has it; otherwise a
+     short note explains the image is the original. Never replaces the image. */
+  function renderTranslation(q) {
+    if (!el.translation) return;
+    const entry = translations[q.id];
+    el.translation.innerHTML = "";
+    if (entry && entry.question) {
+      const label = document.createElement("div");
+      label.className = "qt-label";
+      label.textContent = t("practice.translation");
+      const text = document.createElement("p");
+      text.className = "qt-question";
+      text.textContent = entry.question;
+      el.translation.appendChild(label);
+      el.translation.appendChild(text);
+      if (Array.isArray(entry.options) && entry.options.length) {
+        const list = document.createElement("ol");
+        list.className = "qt-options";
+        entry.options.forEach((option) => {
+          const li = document.createElement("li");
+          li.textContent = option;
+          list.appendChild(li);
+        });
+        el.translation.appendChild(list);
+      }
+      el.translation.hidden = false;
+      return;
+    }
+    const note = t("practice.imageOnlyNote");
+    el.translation.hidden = !note;
+    if (note) {
+      const p = document.createElement("p");
+      p.className = "qt-note";
+      p.textContent = note;
+      el.translation.appendChild(p);
+    }
+  }
+
   function onImageLoad() {
     el.skeleton.classList.add("hidden");
     el.image.classList.add("loaded");
@@ -142,7 +188,7 @@
   el.image.addEventListener("load", onImageLoad);
   el.image.addEventListener("error", () => {
     el.skeleton.classList.add("hidden");
-    el.image.alt = "Зураг ачаалагдсангүй — дахин оролдоно уу";
+    el.image.alt = t("practice.imageError");
   });
 
   function renderDots() {
@@ -152,7 +198,7 @@
       dot.type = "button";
       dot.className = "dot";
       dot.textContent = i + 1;
-      dot.setAttribute("aria-label", "Асуулт " + (i + 1) + " руу очих");
+      dot.setAttribute("aria-label", t("practice.dotAria", { n: i + 1 }));
       const sel = answers[q.questionNumber];
       if (sel !== undefined) {
         if (mode === "learning" || finished) {
@@ -203,8 +249,7 @@
     if (unanswered.length) {
       const firstIdx = questions.indexOf(unanswered[0]);
       el.feedback.className = "feedback-area show bad";
-      el.feedback.textContent = unanswered.length + " асуулт хариулаагүй байна — " +
-        (firstIdx + 1) + "-р асуултаас үргэлжлүүлнэ үү.";
+      el.feedback.textContent = t("practice.unanswered", { count: unanswered.length, first: firstIdx + 1 });
       goTo(firstIdx);
       return;
     }
@@ -239,7 +284,7 @@
     el.resultsArea.hidden = false;
     el.resultsArea.innerHTML =
       '<div class="card results-card">' +
-        '<div class="results-ring" role="img" aria-label="Оноо ' + score + " / " + total + '">' +
+        '<div class="results-ring" role="img" aria-label="' + t("results.scoreAria", { score, total }) + '">' +
           '<svg width="130" height="130" viewBox="0 0 130 130">' +
             '<circle cx="65" cy="65" r="56" fill="none" stroke="var(--bg-subtle)" stroke-width="11"/>' +
             '<circle cx="65" cy="65" r="56" fill="none" stroke="' + ringColor + '" stroke-width="11" ' +
@@ -247,33 +292,35 @@
           "</svg>" +
           '<div class="results-ring-label">' + score + "/" + total + "</div>" +
         "</div>" +
-        '<p class="results-verdict">' + (passed ? "Тэнцлээ! 🎉" : "Тэнцсэнгүй 😔") + "</p>" +
+        '<p class="results-verdict">' + (passed ? t("results.passed") : t("results.failed")) + "</p>" +
         '<p class="results-detail">' +
           (passed
-            ? "Маш сайн! Та энэ бүлгийг амжилттай давлаа."
-            : "Тэнцэхийн тулд 20 асуултаас дор хаяж " + P.PASS_SCORE + " зөв хариулах хэрэгтэй. Дахин оролдоорой!") +
+            ? t("results.passedChapter")
+            : t("results.failedDetail", { total, pass: P.PASS_SCORE })) +
         "</p>" +
         '<div class="results-actions">' +
-          '<button class="btn btn-primary" id="retry-btn" type="button">Дахин эхлэх</button>' +
+          '<button class="btn btn-primary" id="retry-btn" type="button">' + t("results.retry") + "</button>" +
           (chapterId < P.TOTAL_CHAPTERS
-            ? '<a class="btn btn-soft" href="/practice?chapter=' + (chapterId + 1) + '">Дараагийн бүлэг →</a>'
+            ? '<a class="btn btn-soft" href="/practice?chapter=' + (chapterId + 1) + '">' + t("results.nextChapter") + "</a>"
             : "") +
-          '<a class="btn btn-ghost" href="/">Нүүр хуудас</a>' +
+          '<a class="btn btn-ghost" href="/">' + t("results.home") + "</a>" +
         "</div>" +
       "</div>" +
       (mistakes.length
-        ? '<div class="section-header"><h2 class="section-title">Алдсан асуултууд (' + mistakes.length + ')</h2></div>' +
+        ? '<div class="section-header"><h2 class="section-title">' +
+            t("results.mistakes", { count: mistakes.length }) + "</h2></div>" +
           '<div class="mistake-list">' +
           mistakes.map((q) =>
             '<div class="mistake-item">' +
-              '<div class="mistake-meta"><span>Асуулт ' + q.questionNumber + "</span>" +
-                '<span class="your">Таны хариулт: ' + answers[q.questionNumber] + "</span>" +
-                '<span class="right">Зөв хариулт: ' + q.correctAnswer + "</span></div>" +
-              '<img src="' + q.imagePath + '" alt="Асуулт ' + q.questionNumber + '-ийн зураг" loading="lazy"/>' +
+              '<div class="mistake-meta"><span>' + t("practice.question", { n: q.questionNumber }) + "</span>" +
+                '<span class="your">' + t("results.yourAnswer", { answer: answers[q.questionNumber] }) + "</span>" +
+                '<span class="right">' + t("results.correctAnswer", { answer: q.correctAnswer }) + "</span></div>" +
+              '<img src="' + q.imagePath + '" alt="' +
+                t("practice.imageAltChapter", { chapter: chapterId, n: q.questionNumber }) + '" loading="lazy"/>' +
             "</div>"
           ).join("") +
           "</div>"
-        : '<div class="empty-state">Бүх асуултад зөв хариуллаа — алдаа алга! 💯</div>');
+        : '<div class="empty-state">' + t("results.noMistakes") + "</div>");
 
     document.getElementById("retry-btn").addEventListener("click", restart);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -330,10 +377,20 @@
 
   /* ---------- Boot ---------- */
 
+  /** Optional per-language overlay for the image-only questions. Missing or
+      broken overlays are ignored: the original images always work. */
+  function loadTranslations() {
+    if (I18N.lang === I18N.DEFAULT_LANG) return Promise.resolve({});
+    return fetch("/public/data/questions." + I18N.lang + ".json", { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : {}))
+      .then((data) => (data && data.questions) || {})
+      .catch(() => ({}));
+  }
+
   function begin(selectedMode, resumeSession) {
     mode = selectedMode;
     el.modeOverlay.hidden = true;
-    el.modeChip.textContent = mode === "exam" ? "Шалгалт" : "Сургалт";
+    el.modeChip.textContent = mode === "exam" ? t("mode.exam") : t("mode.learning");
     el.modeChip.classList.toggle("exam", mode === "exam");
     if (resumeSession) restoreSession(resumeSession);
     if (mode === "exam") startTimer();
@@ -345,15 +402,16 @@
     P.startHeartbeat(() => ({ chapterId, questionNumber: index + 1 }));
   }
 
-  Promise.all([P.requireStudent(), P.loadQuestions()])
-    .then(([student, all]) => {
+  Promise.all([P.requireStudent(), P.loadQuestions(), loadTranslations()])
+    .then(([student, all, overlay]) => {
+      translations = overlay;
       const entitlements = student.entitlements || ["regular"];
       if (entitlements.indexOf("regular") === -1) {
-        throw new Error("Танд дүрмийн тестийн эрх олгогдоогүй байна. Багштайгаа холбогдоно уу.");
+        throw new Error(t("practice.noRegular"));
       }
       questions = P.questionsForChapter(all, chapterId);
       if (questions.length !== P.QUESTIONS_PER_CHAPTER) {
-        throw new Error("Бүлэг " + chapterId + "-ийн өгөгдөл дутуу байна (" + questions.length + "/20).");
+        throw new Error(t("practice.incomplete", { chapter: chapterId, count: questions.length }));
       }
 
       const session = chState.session;
@@ -374,7 +432,7 @@
       el.errorArea.innerHTML = "";
       const banner = document.createElement("div");
       banner.className = "error-banner";
-      banner.textContent = "Алдаа гарлаа: " + err.message + " — Хуудсыг дахин ачаална уу.";
+      banner.textContent = t("common.errorReload", { message: err.message });
       el.errorArea.appendChild(banner);
     });
 

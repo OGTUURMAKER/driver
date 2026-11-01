@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 72" role="img" aria-label="Адуун Чулууны Нуруу — Жолоочийн сургалтын төв">
+  <defs>
+    <linearGradient id="acn-bg-full" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3563f2"/>
+      <stop offset="1" stop-color="#1a35a3"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4 4)">
+    <rect width="64" height="64" rx="15" fill="url(#acn-bg-full)"/>
+    <path d="M0 41 L14 29 L21 34 L33 18 L45 31 L51 27 L64 38 V64 H0 Z" fill="#ffffff" fill-opacity="0.16"/>
+    <path d="M7 37 L14 30.5 L21 35.5 L33 20 L45 32.5 L51 28.5 L57 33.5" fill="none" stroke="#ffffff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+    <path d="M11 64 Q27.5 52 30.2 40 L34.8 40 Q37.5 52 51 64 Z" fill="#ffffff"/>
+    <path d="M31.6 62 Q33.6 51 32.5 42.5" fill="none" stroke="#f5a524" stroke-width="2.4" stroke-linecap="round" stroke-dasharray="4.2 3.4"/>
+  </g>
+  <text x="84" y="35" font-family="-apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="24" font-weight="800" fill="#14161f" letter-spacing="-0.2">Адуун Чулууны Нуруу</text>
+  <text x="85" y="57" font-family="-apple-system, 'Segoe UI', Roboto, Arial, sans-serif" font-size="13" font-weight="600" fill="#5a6072" letter-spacing="1.2">ЖОЛООЧИЙН СУРГАЛТЫН ТӨВ</text>
+</svg>

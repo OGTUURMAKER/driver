@@ -3,26 +3,34 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Багшийн самбар — Жолооны дүрмийн тест</title>
+    <title data-i18n="title.teacher">Багшийн самбар — Адуун Чулууны Нуруу</title>
+    <link rel="icon" type="image/svg+xml" href="/public/assets/brand/logo-mark.svg?v=1" />
     <link rel="stylesheet" href="/public/platform.css" />
+    <script src="/public/i18n.js"></script>
+    <script src="/public/locales/mn.js"></script>
+    <script src="/public/locales/zh.js"></script>
     <script src="/public/platform.js"></script>
   </head>
   <body>
     <div class="admin-shell">
       <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">🎓</span>
-          <span>Багшийн самбар</span>
-        </div>
+        <a class="brand" href="/teacher">
+          <img class="brand-logo" src="/public/assets/brand/logo-mark.svg?v=1" width="40" height="40" alt="" />
+          <span class="brand-text">
+            <span class="brand-name">Адуун Чулууны Нуруу</span>
+            <span class="brand-tag" data-i18n="teacher.badge">Багшийн самбар</span>
+          </span>
+        </a>
         <div class="topbar-actions">
-          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих">🌙</button>
-          <button id="logout-btn" class="icon-btn" type="button" aria-label="Гарах" title="Гарах">⏻</button>
+          <div data-lang-switch></div>
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих" data-i18n-attr="aria-label:common.themeToggle">🌙</button>
+          <button id="logout-btn" class="icon-btn" type="button" aria-label="Гарах" title="Гарах" data-i18n-attr="aria-label:common.logout; title:common.logout">⏻</button>
         </div>
       </header>
 
-      <nav class="tabs" aria-label="Самбарын хэсгүүд">
-        <button class="tab-btn active" data-tab="overview" type="button">Тойм</button>
-        <button class="tab-btn" data-tab="students" type="button">Сурагчид</button>
+      <nav class="tabs" aria-label="Самбарын хэсгүүд" data-i18n-attr="aria-label:teacher.tabsAria">
+        <button class="tab-btn active" data-tab="overview" type="button" data-i18n="teacher.tabOverview">Тойм</button>
+        <button class="tab-btn" data-tab="students" type="button" data-i18n="teacher.tabStudents">Сурагчид</button>
       </nav>
 
       <div id="error-area"></div>
@@ -44,12 +52,12 @@
 
         <div class="two-col">
           <div class="card">
-            <h3 class="section-title" style="margin:0">Шалгалтын идэвх — сүүлийн 14 хоног</h3>
+            <h3 class="section-title" style="margin:0" data-i18n="teacher.chartTitle">Шалгалтын идэвх — сүүлийн 14 хоног</h3>
             <div class="chart-bars" id="exam-chart"></div>
             <div class="chart-labels" id="exam-chart-labels"></div>
           </div>
           <div class="card">
-            <h3 class="section-title" style="margin:0">Хамгийн идэвхтэй сурагчид</h3>
+            <h3 class="section-title" style="margin:0" data-i18n="teacher.mostActive">Хамгийн идэвхтэй сурагчид</h3>
             <div class="ranked-list" id="most-active"></div>
           </div>
         </div>
@@ -59,53 +67,53 @@
       <section id="tab-students" hidden>
         <div id="students-list-view">
           <div class="toolbar">
-            <input class="search-input" id="search-input" type="search" placeholder="Нэр, утас, ID-аар хайх…" />
-            <select id="status-filter" aria-label="Төлөвөөр шүүх">
-              <option value="all">Бүх төлөв</option>
-              <option value="active">Идэвхтэй</option>
-              <option value="expired">Хугацаа дууссан</option>
-              <option value="disabled">Хаагдсан</option>
+            <input class="search-input" id="search-input" type="search" placeholder="Нэр, утас, ID-аар хайх…" data-i18n-attr="placeholder:teacher.search" />
+            <select id="status-filter" aria-label="Төлөвөөр шүүх" data-i18n-attr="aria-label:teacher.filterAria">
+              <option value="all" data-i18n="teacher.filterAll">Бүх төлөв</option>
+              <option value="active" data-i18n="teacher.statusActive">Идэвхтэй</option>
+              <option value="expired" data-i18n="teacher.statusExpired">Хугацаа дууссан</option>
+              <option value="disabled" data-i18n="teacher.statusDisabled">Хаагдсан</option>
             </select>
-            <select id="sort-select" aria-label="Эрэмбэлэх">
-              <option value="createdAt">Шинэ нь эхэндээ</option>
-              <option value="name">Нэрээр</option>
-              <option value="expiresAt">Дуусах огноогоор</option>
-              <option value="lastActive">Сүүлийн идэвхээр</option>
-              <option value="progress">Явцаар</option>
-              <option value="score">Дундаж оноогоор</option>
+            <select id="sort-select" aria-label="Эрэмбэлэх" data-i18n-attr="aria-label:teacher.sortAria">
+              <option value="createdAt" data-i18n="teacher.sortCreated">Шинэ нь эхэндээ</option>
+              <option value="name" data-i18n="teacher.sortName">Нэрээр</option>
+              <option value="expiresAt" data-i18n="teacher.sortExpires">Дуусах огноогоор</option>
+              <option value="lastActive" data-i18n="teacher.sortLastActive">Сүүлийн идэвхээр</option>
+              <option value="progress" data-i18n="teacher.sortProgress">Явцаар</option>
+              <option value="score" data-i18n="teacher.sortScore">Дундаж оноогоор</option>
             </select>
-            <button class="btn btn-primary" id="new-student-btn" type="button">+ Шинэ сурагч</button>
+            <button class="btn btn-primary" id="new-student-btn" type="button" data-i18n="teacher.newStudent">+ Шинэ сурагч</button>
           </div>
 
           <div class="card" id="create-card" hidden style="margin-bottom:14px">
-            <h3 style="margin:0 0 14px">Шинэ сурагч бүртгэх</h3>
+            <h3 style="margin:0 0 14px" data-i18n="teacher.createTitle">Шинэ сурагч бүртгэх</h3>
             <form id="create-form" class="form-grid">
-              <label><span>Бүтэн нэр *</span><input name="name" required minlength="2" /></label>
-              <label><span>Утасны дугаар</span><input name="phone" type="tel" /></label>
-              <label><span>Хандах хугацаа (хоног)</span><input name="durationDays" type="number" value="30" min="1" max="365" /></label>
-              <label><span>Тэмдэглэл</span><input name="notes" /></label>
+              <label><span data-i18n="teacher.fieldFullName">Бүтэн нэр *</span><input name="name" required minlength="2" /></label>
+              <label><span data-i18n="teacher.fieldPhoneNumber">Утасны дугаар</span><input name="phone" type="tel" /></label>
+              <label><span data-i18n="teacher.fieldDuration">Хандах хугацаа (хоног)</span><input name="durationDays" type="number" value="30" min="1" max="365" /></label>
+              <label><span data-i18n="teacher.fieldNotes">Тэмдэглэл</span><input name="notes" /></label>
               <div class="full">
-                <span style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px">Шалгалтын эрх</span>
+                <span style="display:block;font-size:12px;font-weight:700;color:var(--text-muted);margin-bottom:8px" data-i18n="teacher.fieldEntitlements">Шалгалтын эрх</span>
                 <div style="display:flex;gap:16px;flex-wrap:wrap">
                   <label style="display:flex;align-items:center;gap:8px;font-weight:600">
                     <input type="checkbox" name="entitlements" value="regular" checked style="width:auto" />
-                    <span>Дүрмийн тест</span>
+                    <span data-i18n="entitlement.regular">Дүрмийн тест</span>
                   </label>
                   <label style="display:flex;align-items:center;gap:8px;font-weight:600">
                     <input type="checkbox" name="entitlements" value="category_upgrade" style="width:auto" />
-                    <span>Ангилал ахиулах</span>
+                    <span data-i18n="entitlement.upgrade">Ангилал ахиулах</span>
                   </label>
                 </div>
               </div>
               <div class="full" style="display:flex;gap:10px">
-                <button class="btn btn-primary" type="submit">Бүртгэх ба ID үүсгэх</button>
-                <button class="btn btn-ghost" type="button" id="create-cancel">Болих</button>
+                <button class="btn btn-primary" type="submit" data-i18n="teacher.createSubmit">Бүртгэх ба ID үүсгэх</button>
+                <button class="btn btn-ghost" type="button" id="create-cancel" data-i18n="teacher.cancel">Болих</button>
               </div>
             </form>
             <div class="new-id-reveal" id="new-id-reveal" hidden>
-              <div class="nid-label">Шинэ сурагчийн Special Access ID</div>
+              <div class="nid-label" data-i18n="teacher.newIdLabel">Шинэ сурагчийн Special Access ID</div>
               <div class="nid-code" id="new-id-code"></div>
-              <button class="btn btn-soft" id="copy-id-btn" type="button">📋 Хуулах</button>
+              <button class="btn btn-soft" id="copy-id-btn" type="button" data-i18n="teacher.copy">📋 Хуулах</button>
             </div>
           </div>
 
@@ -113,21 +121,21 @@
             <table class="students-table">
               <thead>
                 <tr>
-                  <th data-sort="name">Нэр</th>
-                  <th>Access ID</th>
-                  <th>Төлөв</th>
-                  <th data-sort="createdAt">Бүртгэсэн</th>
-                  <th data-sort="expiresAt">Дуусах</th>
-                  <th data-sort="lastActive">Сүүлд идэвхтэй</th>
-                  <th data-sort="progress">Явц</th>
-                  <th data-sort="score">Дундаж</th>
-                  <th>Үйлдэл</th>
+                  <th data-sort="name" data-i18n="teacher.colName">Нэр</th>
+                  <th data-i18n="teacher.colCode">Access ID</th>
+                  <th data-i18n="teacher.colStatus">Төлөв</th>
+                  <th data-sort="createdAt" data-i18n="teacher.colCreated">Бүртгэсэн</th>
+                  <th data-sort="expiresAt" data-i18n="teacher.colExpires">Дуусах</th>
+                  <th data-sort="lastActive" data-i18n="teacher.colLastActive">Сүүлд идэвхтэй</th>
+                  <th data-sort="progress" data-i18n="teacher.colProgress">Явц</th>
+                  <th data-sort="score" data-i18n="teacher.colAverage">Дундаж</th>
+                  <th data-i18n="teacher.colActions">Үйлдэл</th>
                 </tr>
               </thead>
               <tbody id="students-tbody"></tbody>
             </table>
           </div>
-          <div class="empty-state" id="students-empty" hidden>Сурагч олдсонгүй.</div>
+          <div class="empty-state" id="students-empty" data-i18n="teacher.noStudents" hidden>Сурагч олдсонгүй.</div>
         </div>
 
         <!-- Student profile -->

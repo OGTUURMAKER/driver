@@ -5,6 +5,9 @@
   "use strict";
 
   const P = window.Platform;
+  const I18N = window.I18N;
+  const t = I18N.t;
+  I18N.boot();
 
   const themeBtn = document.getElementById("theme-toggle");
   function syncThemeIcon() {
@@ -31,13 +34,13 @@
     const best = test.bestScore === null || test.bestScore === undefined ? null : test.bestScore;
 
     let badgeClass = "";
-    let badgeText = "Эхлээгүй";
+    let badgeText = t("badge.notStarted");
     if (best !== null && best >= passScore) {
       badgeClass = "passed";
-      badgeText = "Тэнцсэн";
+      badgeText = t("badge.passed");
     } else if (best !== null) {
       badgeClass = "failed";
-      badgeText = "Дахин үзэх";
+      badgeText = t("badge.retry");
     }
 
     const percent = best !== null ? Math.round((best / test.questionCount) * 100) : 0;
@@ -45,20 +48,19 @@
     const card = document.createElement("a");
     card.className = "chapter-card";
     card.href = "/category-upgrade/practice?test=" + test.testNumber;
-    card.setAttribute(
-      "aria-label",
-      "Тест " + test.testNumber + " — " + badgeText +
-        (best !== null ? ", шилдэг оноо " + best + "/" + test.questionCount : "")
-    );
+    const name = t("test.name", { test: test.testNumber });
+    card.setAttribute("aria-label", best !== null
+      ? t("card.ariaBest", { name, status: badgeText, score: best, total: test.questionCount })
+      : t("card.aria", { name, status: badgeText }));
     card.innerHTML =
       '<div class="chapter-card-top">' +
-        '<span class="chapter-number">Тест ' + test.testNumber + "</span>" +
+        '<span class="chapter-number">' + name + "</span>" +
         '<span class="chapter-badge ' + badgeClass + '">' + badgeText + "</span>" +
       "</div>" +
       '<div class="chapter-score">' +
         (best !== null
-          ? "Шилдэг: " + best + "/" + test.questionCount
-          : test.questionCount + " асуулт") +
+          ? t("card.best", { score: best, total: test.questionCount })
+          : t("card.questions", { count: test.questionCount })) +
       "</div>" +
       '<div class="chapter-bar"><div class="chapter-bar-fill' +
         (best !== null && best >= passScore ? " passed" : "") +
@@ -72,26 +74,26 @@
     if (entitlements.indexOf("regular") !== -1) {
       const a = document.createElement("a");
       a.href = "/";
-      a.textContent = "Дүрмийн тест";
+      a.textContent = t("entitlement.regular");
       nav.appendChild(a);
     }
     const b = document.createElement("a");
     b.href = "/category-upgrade";
     b.className = "active";
-    b.textContent = "Ангилал ахиулах";
+    b.textContent = t("entitlement.upgrade");
     nav.appendChild(b);
     nav.hidden = nav.childElementCount < 2;
   }
 
   function render(data) {
     document.getElementById("hero-sub").textContent =
-      data.totalTests + " тест · " + data.questionsPerTest + " асуулт тус бүр";
+      t("upgrade.sub", { tests: data.totalTests, per: data.questionsPerTest });
     document.getElementById("stat-started").textContent = data.summary.testsStarted;
     document.getElementById("stat-started-label").textContent =
-      "Тест эхэлсэн / " + data.totalTests;
+      t("upgrade.statStartedOf", { total: data.totalTests });
     document.getElementById("stat-passed").textContent = data.summary.testsPassed;
     document.getElementById("stat-passed-label").textContent =
-      "Тэнцсэн тест (" + data.passScore + "+)";
+      t("upgrade.statPassedPass", { pass: data.passScore });
     document.getElementById("stat-average").textContent =
       data.summary.averageScore === null ? "—" : data.summary.averageScore.toFixed(1);
     document.getElementById("stat-attempts").textContent = data.summary.attemptCount;
@@ -104,13 +106,13 @@
     document.getElementById("hero-progressbar").setAttribute("aria-valuenow", String(percent));
     document.getElementById("hero-progress-label").textContent =
       data.summary.testsStarted === 0
-        ? "Анхны тестээ эхлүүлээрэй — амжилт хүсье!"
-        : percent + "% гүйцэтгэсэн · " + data.summary.testsStarted + "/" + data.totalTests + " тест";
+        ? t("upgrade.firstTest")
+        : t("upgrade.progressDone", { percent, done: data.summary.testsStarted, total: data.totalTests });
 
     const continueBtn = document.getElementById("continue-btn");
     if (data.summary.lastTest) {
       continueBtn.href = "/category-upgrade/practice?test=" + data.summary.lastTest;
-      continueBtn.textContent = "Үргэлжлүүлэх — Тест " + data.summary.lastTest;
+      continueBtn.textContent = t("upgrade.continue", { test: data.summary.lastTest });
     }
 
     const grid = document.getElementById("test-grid");
@@ -128,7 +130,7 @@
 
     if ((student.entitlements || []).indexOf("category_upgrade") === -1) {
       document.getElementById("test-grid").innerHTML = "";
-      showError("Танд «Ангилал ахиулах» шалгалтын эрх олгогдоогүй байна. Багштайгаа холбогдоно уу.");
+      showError(t("server.noUpgrade"));
       return;
     }
 

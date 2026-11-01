@@ -6,6 +6,9 @@
   "use strict";
 
   const P = window.Platform;
+  const I18N = window.I18N;
+  const t = I18N.t;
+  I18N.boot();
   const params = new URLSearchParams(location.search);
   const testNumber = Math.min(Math.max(parseInt(params.get("test"), 10) || 1, 1), 20);
   let mode = params.get("mode") === "exam" ? "exam" : params.get("mode") === "learning" ? "learning" : null;
@@ -43,6 +46,8 @@
     modeOverlay: document.getElementById("mode-overlay"),
     modeTestLabel: document.getElementById("mode-test-label"),
     examTimer: document.getElementById("exam-timer"),
+    original: document.getElementById("question-original"),
+    originalBody: document.getElementById("question-original-body"),
     themeToggle: document.getElementById("theme-toggle")
   };
 
@@ -52,9 +57,49 @@
   el.themeToggle.addEventListener("click", () => { P.toggleTheme(); syncThemeIcon(); });
   syncThemeIcon();
 
-  el.testTitle.textContent = "Тест " + testNumber;
-  el.modeTestLabel.textContent = "Тест " + testNumber;
-  document.title = "Тест " + testNumber + " — Ангилал ахиулах";
+  el.testTitle.textContent = t("test.name", { test: testNumber });
+  el.counter.textContent = t("practice.counterPlaceholder", { total: 10 });
+  el.modeTestLabel.textContent = t("test.name", { test: testNumber });
+  document.title = t("title.upgradeTest", { test: testNumber });
+
+  /* ---------- Display language ----------
+     The server may attach q.i18n[lang] = { question, options } next to the
+     Mongolian original. Only the wording shown changes: option N is still
+     answer N, so marking and the stored answers are identical in any language. */
+
+  function translated(q) {
+    const entry = q.i18n && q.i18n[I18N.lang];
+    if (!entry || typeof entry.question !== "string" || !Array.isArray(entry.options)) return null;
+    if (entry.options.length !== q.options.length) return null; // never risk misaligned choices
+    return entry;
+  }
+
+  function questionText(q) {
+    const tr = translated(q);
+    return tr ? tr.question : q.question;
+  }
+
+  function optionText(q, i) {
+    const tr = translated(q);
+    return tr ? tr.options[i] : q.options[i];
+  }
+
+  /** Builds the collapsible Mongolian original as DOM (no HTML strings). */
+  function fillOriginal(container, q) {
+    container.innerHTML = "";
+    const text = document.createElement("p");
+    text.lang = "mn";
+    text.textContent = q.question;
+    const list = document.createElement("ol");
+    list.lang = "mn";
+    q.options.forEach((option) => {
+      const li = document.createElement("li");
+      li.textContent = option;
+      list.appendChild(li);
+    });
+    container.appendChild(text);
+    container.appendChild(list);
+  }
 
   /* ---------- Unfinished-session persistence (per test, local only) ---------- */
 
@@ -101,16 +146,23 @@
 
   function renderQuestion() {
     const q = currentQuestion();
-    el.counter.textContent = "Асуулт " + (index + 1) + " / " + questions.length;
-    el.questionLabel.textContent = "Асуулт " + (index + 1);
-    el.questionText.textContent = q.question;
+    el.counter.textContent = t("practice.counter", { n: index + 1, total: questions.length });
+    el.questionLabel.textContent = t("practice.question", { n: index + 1 });
+    el.questionText.textContent = questionText(q);
+
+    const showOriginal = Boolean(translated(q));
+    el.original.hidden = !showOriginal;
+    if (showOriginal) {
+      el.original.open = false;
+      fillOriginal(el.originalBody, q);
+    }
 
     if (q.imagePath) {
       el.imageWrap.hidden = false;
       el.skeleton.classList.remove("hidden");
       el.image.classList.remove("loaded");
       el.image.src = q.imagePath;
-      el.image.alt = "Тест " + testNumber + ", асуулт " + q.questionNumber + "-ийн зураг";
+      el.image.alt = t("upgrade.imageAlt", { test: testNumber, n: q.questionNumber });
       if (el.image.complete && el.image.naturalWidth) onImageLoad();
     } else {
       el.imageWrap.hidden = true;
@@ -121,7 +173,7 @@
     const revealed = mode === "learning" && selected !== undefined;
 
     el.answers.innerHTML = "";
-    q.options.forEach((text, i) => {
+    q.options.forEach((_, i) => {
       const n = i + 1;
       const btn = document.createElement("button");
       btn.type = "button";
@@ -141,7 +193,7 @@
       badge.className = "answer-index";
       badge.textContent = String(n);
       const label = document.createElement("span");
-      label.textContent = text;
+      label.textContent = optionText(q, i);
       btn.appendChild(badge);
       btn.appendChild(label);
       btn.addEventListener("click", () => selectAnswer(n));
@@ -153,12 +205,12 @@
       const good = selected === q.correctAnswer;
       el.feedback.classList.add("show", good ? "good" : "bad");
       el.feedback.textContent = good
-        ? "Зөв байна! 🎉"
-        : "Буруу байна. Зөв хариулт: " + q.correctAnswer + ". " + q.options[q.correctAnswer - 1];
+        ? t("practice.correct")
+        : t("upgrade.wrong", { answer: q.correctAnswer, text: optionText(q, q.correctAnswer - 1) });
     }
 
     el.prevBtn.disabled = index === 0;
-    el.nextBtn.textContent = index === questions.length - 1 ? "Дуусгах ✓" : "Дараах →";
+    el.nextBtn.textContent = index === questions.length - 1 ? t("practice.finish") : t("practice.next");
 
     el.progressFill.style.width = (answeredCount() / questions.length) * 100 + "%";
     el.progressBar.setAttribute("aria-valuemax", String(questions.length));
@@ -176,7 +228,7 @@
   el.image.addEventListener("load", onImageLoad);
   el.image.addEventListener("error", () => {
     el.skeleton.classList.add("hidden");
-    el.image.alt = "Зураг ачаалагдсангүй — дахин оролдоно уу";
+    el.image.alt = t("practice.imageError");
   });
 
   function renderDots() {
@@ -186,7 +238,7 @@
       dot.type = "button";
       dot.className = "dot";
       dot.textContent = i + 1;
-      dot.setAttribute("aria-label", "Асуулт " + (i + 1) + " руу очих");
+      dot.setAttribute("aria-label", t("practice.dotAria", { n: i + 1 }));
       const sel = answers[q.questionNumber];
       if (sel !== undefined) {
         if (mode === "learning" || finished) {
@@ -234,8 +286,7 @@
     if (unanswered.length) {
       const firstIdx = questions.indexOf(unanswered[0]);
       el.feedback.className = "feedback-area show bad";
-      el.feedback.textContent = unanswered.length + " асуулт хариулаагүй байна — " +
-        (firstIdx + 1) + "-р асуултаас үргэлжлүүлнэ үү.";
+      el.feedback.textContent = t("practice.unanswered", { count: unanswered.length, first: firstIdx + 1 });
       goTo(firstIdx);
       return;
     }
@@ -262,7 +313,7 @@
       const score = questions.reduce(
         (sum, q) => sum + (answers[q.questionNumber] === q.correctAnswer ? 1 : 0), 0);
       outcome = { score, total: questions.length, passScore, passed: score >= passScore };
-      showBanner("Дүнг серверт хадгалж чадсангүй: " + error.message);
+      showBanner(t("results.saveFailed", { message: error.message }));
     }
     renderResults(outcome);
   }
@@ -282,7 +333,7 @@
     el.resultsArea.hidden = false;
     el.resultsArea.innerHTML =
       '<div class="card results-card">' +
-        '<div class="results-ring" role="img" aria-label="Оноо ' + score + " / " + total + '">' +
+        '<div class="results-ring" role="img" aria-label="' + t("results.scoreAria", { score, total }) + '">' +
           '<svg width="130" height="130" viewBox="0 0 130 130">' +
             '<circle cx="65" cy="65" r="56" fill="none" stroke="var(--bg-subtle)" stroke-width="11"/>' +
             '<circle cx="65" cy="65" r="56" fill="none" stroke="' + ringColor + '" stroke-width="11" ' +
@@ -290,42 +341,46 @@
           "</svg>" +
           '<div class="results-ring-label">' + score + "/" + total + "</div>" +
         "</div>" +
-        '<p class="results-verdict">' + (passed ? "Тэнцлээ! 🎉" : "Тэнцсэнгүй 😔") + "</p>" +
+        '<p class="results-verdict">' + (passed ? t("results.passed") : t("results.failed")) + "</p>" +
         '<p class="results-detail">' +
           (passed
-            ? "Маш сайн! Та энэ тестийг амжилттай давлаа."
-            : "Тэнцэхийн тулд " + total + " асуултаас дор хаяж " + (outcome.passScore || passScore) +
-              " зөв хариулах хэрэгтэй. Дахин оролдоорой!") +
+            ? t("results.passedTest")
+            : t("results.failedDetail", { total, pass: outcome.passScore || passScore })) +
         "</p>" +
         '<div class="results-actions">' +
-          '<button class="btn btn-primary" id="retry-btn" type="button">Дахин эхлэх</button>' +
+          '<button class="btn btn-primary" id="retry-btn" type="button">' + t("results.retry") + "</button>" +
           (testNumber < 20
             ? '<a class="btn btn-soft" href="/category-upgrade/practice?test=' + (testNumber + 1) +
-              '">Дараагийн тест →</a>'
+              '">' + t("results.nextTest") + "</a>"
             : "") +
-          '<a class="btn btn-ghost" href="/category-upgrade">Тестийн жагсаалт</a>' +
+          '<a class="btn btn-ghost" href="/category-upgrade">' + t("results.testList") + "</a>" +
         "</div>" +
       "</div>" +
       (mistakes.length
-        ? '<div class="section-header"><h2 class="section-title">Алдсан асуултууд (' +
-            mistakes.length + ')</h2></div>' +
+        ? '<div class="section-header"><h2 class="section-title">' +
+            t("results.mistakes", { count: mistakes.length }) + "</h2></div>" +
           '<div class="mistake-list">' +
           mistakes.map((q) =>
             '<div class="mistake-item">' +
-              '<div class="mistake-meta"><span>Асуулт ' + q.questionNumber + "</span>" +
-                '<span class="your">Таны хариулт: ' + (answers[q.questionNumber] || "—") + "</span>" +
-                '<span class="right">Зөв хариулт: ' + q.correctAnswer + "</span></div>" +
-              '<p class="cu-question-text">' + escapeHtml(q.question) + "</p>" +
+              '<div class="mistake-meta"><span>' + t("practice.question", { n: q.questionNumber }) + "</span>" +
+                '<span class="your">' + t("results.yourAnswer", { answer: answers[q.questionNumber] || "—" }) + "</span>" +
+                '<span class="right">' + t("results.correctAnswer", { answer: q.correctAnswer }) + "</span></div>" +
+              '<p class="cu-question-text">' + escapeHtml(questionText(q)) + "</p>" +
               '<p class="results-detail">' + q.correctAnswer + ". " +
-                escapeHtml(q.options[q.correctAnswer - 1]) + "</p>" +
+                escapeHtml(optionText(q, q.correctAnswer - 1)) + "</p>" +
+              (translated(q)
+                ? '<details class="cu-original"><summary>' + escapeHtml(t("practice.showOriginal")) +
+                  '</summary><p lang="mn">' + escapeHtml(q.question) + '</p><p lang="mn">' +
+                  q.correctAnswer + ". " + escapeHtml(q.options[q.correctAnswer - 1]) + "</p></details>"
+                : "") +
               (q.imagePath
-                ? '<img src="' + q.imagePath + '" alt="Асуулт ' + q.questionNumber +
-                  '-ийн зураг" loading="lazy"/>'
+                ? '<img src="' + q.imagePath + '" alt="' +
+                  escapeHtml(t("upgrade.imageAlt", { test: testNumber, n: q.questionNumber })) + '" loading="lazy"/>'
                 : "") +
             "</div>"
           ).join("") +
           "</div>"
-        : '<div class="empty-state">Бүх асуултад зөв хариуллаа — алдаа алга! 💯</div>');
+        : '<div class="empty-state">' + t("results.noMistakes") + "</div>");
 
     document.getElementById("retry-btn").addEventListener("click", restart);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -392,7 +447,7 @@
     mode = selectedMode;
     el.modeOverlay.hidden = true;
     el.quizArea.hidden = false;
-    el.modeChip.textContent = mode === "exam" ? "Шалгалт" : "Сургалт";
+    el.modeChip.textContent = mode === "exam" ? t("mode.exam") : t("mode.learning");
     el.modeChip.classList.toggle("exam", mode === "exam");
     if (resumeSession) {
       answers = resumeSession.answers || {};
@@ -409,7 +464,7 @@
     .then(([, data]) => {
       questions = data.questions;
       passScore = data.passScore;
-      if (!questions.length) throw new Error("Тест " + testNumber + "-ийн өгөгдөл хоосон байна.");
+      if (!questions.length) throw new Error(t("upgrade.empty", { test: testNumber }));
 
       const session = loadSessions()[String(testNumber)];
       if (mode) {
@@ -424,7 +479,7 @@
     })
     .catch((err) => {
       el.quizArea.hidden = true;
-      showBanner("Алдаа гарлаа: " + err.message);
+      showBanner(t("common.errorWith", { message: err.message }));
     });
 
   window.addEventListener("pagehide", saveSession);

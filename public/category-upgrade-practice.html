@@ -3,23 +3,29 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ангилал ахиулах — тест</title>
+    <title data-i18n="title.upgradePractice">Ангилал ахиулах — тест — Адуун Чулууны Нуруу</title>
+    <link rel="icon" type="image/svg+xml" href="/public/assets/brand/logo-mark.svg?v=1" />
     <link rel="stylesheet" href="/public/platform.css" />
+    <script src="/public/i18n.js"></script>
+    <script src="/public/locales/mn.js"></script>
+    <script src="/public/locales/zh.js"></script>
     <script src="/public/platform.js"></script>
   </head>
   <body>
     <div class="practice-shell">
       <header class="practice-topbar">
-        <a class="icon-btn" href="/category-upgrade" aria-label="Тестийн жагсаалт руу буцах">←</a>
+        <a class="icon-btn" href="/category-upgrade" aria-label="Тестийн жагсаалт руу буцах" data-i18n-attr="aria-label:upgrade.backToList">←</a>
+        <img class="brand-logo practice-logo" src="/public/assets/brand/logo-mark.svg?v=1" width="34" height="34" alt="Адуун Чулууны Нуруу" />
         <div class="practice-title">
-          <span id="test-title">Тест —</span>
+          <span id="test-title" data-i18n="test.placeholder">Тест —</span>
           <small id="question-counter">Асуулт — / 10</small>
         </div>
-        <span class="mode-chip" id="mode-chip">Сургалт</span>
-        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих">🌙</button>
+        <span class="mode-chip" id="mode-chip" data-i18n="mode.learning">Сургалт</span>
+        <div data-lang-switch></div>
+        <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих" data-i18n-attr="aria-label:common.themeToggle">🌙</button>
       </header>
 
-      <div class="quiz-progress-track" role="progressbar" aria-label="Тестийн явц"
+      <div class="quiz-progress-track" role="progressbar" aria-label="Тестийн явц" data-i18n-attr="aria-label:practice.progressAria"
            aria-valuemin="0" aria-valuemax="10" aria-valuenow="0" id="quiz-progressbar">
         <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
       </div>
@@ -29,7 +35,7 @@
       <main id="quiz-area" hidden>
         <div class="question-card">
           <div class="question-meta">
-            <span id="question-label">Асуулт —</span>
+            <span id="question-label" data-i18n="practice.questionPlaceholder">Асуулт —</span>
             <span id="exam-timer" hidden>00:00</span>
           </div>
           <p class="cu-question-text" id="question-text"></p>
@@ -37,16 +43,20 @@
             <div class="image-skeleton" id="image-skeleton"></div>
             <img class="question-image" id="question-image" alt="" decoding="async" />
           </div>
-          <div class="answers answers-text" id="answers" role="group" aria-label="Хариултын сонголтууд"></div>
+          <details class="cu-original" id="question-original" hidden>
+            <summary data-i18n="practice.showOriginal">Монгол эх бичвэрийг харах</summary>
+            <div id="question-original-body"></div>
+          </details>
+          <div class="answers answers-text" id="answers" role="group" aria-label="Хариултын сонголтууд" data-i18n-attr="aria-label:practice.answersAria"></div>
           <div class="feedback-area" id="feedback" role="status" aria-live="polite"></div>
         </div>
 
         <div class="quiz-nav">
-          <button class="btn btn-ghost" id="prev-btn" type="button">← Өмнөх</button>
-          <button class="btn btn-primary" id="next-btn" type="button">Дараах →</button>
+          <button class="btn btn-ghost" id="prev-btn" type="button" data-i18n="practice.prev">← Өмнөх</button>
+          <button class="btn btn-primary" id="next-btn" type="button" data-i18n="practice.next">Дараах →</button>
         </div>
 
-        <nav class="question-dots" id="question-dots" aria-label="Асуулт руу очих"></nav>
+        <nav class="question-dots" id="question-dots" aria-label="Асуулт руу очих" data-i18n-attr="aria-label:practice.dotsAria"></nav>
       </main>
 
       <main id="results-area" hidden></main>
@@ -54,16 +64,16 @@
 
     <div class="mode-overlay" id="mode-overlay" hidden>
       <div class="mode-dialog" role="dialog" aria-modal="true" aria-labelledby="mode-title">
-        <h2 id="mode-title">Горим сонгоно уу</h2>
-        <p id="mode-test-label">Тест —</p>
+        <h2 id="mode-title" data-i18n="mode.choose">Горим сонгоно уу</h2>
+        <p id="mode-test-label" data-i18n="test.placeholder">Тест —</p>
         <div class="mode-options">
           <button class="mode-option" id="mode-learning" type="button">
-            <div class="mo-title">📖 Сургалтын горим</div>
-            <div class="mo-desc">Хариулт бүрийн дараа зөв хариултыг шууд харуулна.</div>
+            <div class="mo-title" data-i18n="mode.learningTitle">📖 Сургалтын горим</div>
+            <div class="mo-desc" data-i18n="mode.learningDescShort">Хариулт бүрийн дараа зөв хариултыг шууд харуулна.</div>
           </button>
           <button class="mode-option" id="mode-exam" type="button">
-            <div class="mo-title">⏱️ Шалгалтын горим</div>
-            <div class="mo-desc">Дуустал хариулт харагдахгүй, төгсгөлд нь оноо болон алдаагаа харна.</div>
+            <div class="mo-title" data-i18n="mode.examTitle">⏱️ Шалгалтын горим</div>
+            <div class="mo-desc" data-i18n="mode.examDescShort">Дуустал хариулт харагдахгүй, төгсгөлд нь оноо болон алдаагаа харна.</div>
           </button>
         </div>
       </div>

@@ -19,6 +19,8 @@
     if (!teacherCard.hidden) teacherCard.querySelector("input").focus();
   });
 
+  const t = window.I18N.t;
+
   function setMessage(element, text, ok) {
     element.textContent = text;
     element.className = "message show " + (ok ? "ok" : "error");
@@ -60,9 +62,9 @@
         body: JSON.stringify({ code })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Алдаа гарлаа.");
+      if (!res.ok) throw new Error(window.I18N.serverMessage(data.error) || t("common.error"));
       localStorage.setItem("studentToken", data.token);
-      setMessage(studentMessage, "Тавтай морил, " + data.student.name + "!", true);
+      setMessage(studentMessage, t("login.welcome", { name: data.student.name }), true);
       location.href = "/";
     } catch (error) {
       setMessage(studentMessage, error.message, false);
@@ -79,7 +81,7 @@
         body: JSON.stringify({ password })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Алдаа гарлаа.");
+      if (!res.ok) throw new Error(window.I18N.serverMessage(data.error) || t("common.error"));
       localStorage.setItem("teacherToken", data.token);
       location.href = "/teacher";
     } catch (error) {

@@ -3,88 +3,96 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Жолооны үнэмлэхийн дүрмийн шалгалтад бэлдэх платформ — 40 бүлэг, 800 асуулт" />
-    <title>Жолооны дүрмийн тест — 40 бүлэг, 800 асуулт</title>
+    <meta name="description" data-i18n-attr="content:meta.home" content="Адуун Чулууны Нуруу жолоочийн сургалтын төв — жолооны үнэмлэхийн дүрмийн шалгалтад бэлдэх платформ, 40 бүлэг, 800 асуулт" />
+    <title data-i18n="title.home">Дүрмийн тест — Адуун Чулууны Нуруу</title>
+    <link rel="icon" type="image/svg+xml" href="/public/assets/brand/logo-mark.svg?v=1" />
     <link rel="stylesheet" href="/public/platform.css" />
+    <script src="/public/i18n.js"></script>
+    <script src="/public/locales/mn.js"></script>
+    <script src="/public/locales/zh.js"></script>
     <script src="/public/platform.js"></script>
   </head>
   <body>
     <div class="app-shell">
       <header class="topbar">
-        <div class="brand">
-          <span class="brand-mark" aria-hidden="true">🚗</span>
-          <span>Дүрмийн тест</span>
-        </div>
+        <a class="brand" href="/">
+          <img class="brand-logo" src="/public/assets/brand/logo-mark.svg?v=1" width="40" height="40" alt="" />
+          <span class="brand-text">
+            <span class="brand-name">Адуун Чулууны Нуруу</span>
+            <span class="brand-tag" data-i18n="brand.tagline">Жолоочийн сургалтын төв</span>
+          </span>
+        </a>
         <div class="topbar-actions">
           <span class="mode-chip" id="student-chip" hidden></span>
-          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих">🌙</button>
-          <button id="logout-btn" class="icon-btn" type="button" aria-label="Гарах" title="Гарах">⏻</button>
+          <div data-lang-switch></div>
+          <button id="theme-toggle" class="icon-btn" type="button" aria-label="Гэрэл/харанхуй горим солих" data-i18n-attr="aria-label:common.themeToggle">🌙</button>
+          <button id="logout-btn" class="icon-btn" type="button" aria-label="Гарах" title="Гарах" data-i18n-attr="aria-label:common.logout; title:common.logout">⏻</button>
         </div>
       </header>
 
       <main>
-        <nav class="exam-switch" id="exam-switch" aria-label="Шалгалтын хэсэг" hidden></nav>
+        <nav class="exam-switch" id="exam-switch" aria-label="Шалгалтын хэсэг" data-i18n-attr="aria-label:nav.examSwitch" hidden></nav>
 
         <section class="card" id="category-upgrade-card" hidden style="margin-bottom:18px">
           <div class="section-header" style="margin-top:0">
-            <h2 class="section-title">Ангилал ахиулах</h2>
-            <span class="section-hint">20 тест · 10 асуулт тус бүр</span>
+            <h2 class="section-title" data-i18n="entitlement.upgrade">Ангилал ахиулах</h2>
+            <span class="section-hint" data-i18n="home.upgradeHint">20 тест · 10 асуулт тус бүр</span>
           </div>
-          <p class="results-detail" style="margin:0 0 14px">
+          <p class="results-detail" style="margin:0 0 14px" data-i18n="home.upgradeBody">
             Ангилал ахиулах шалгалтын бэлтгэл тестүүд танд нээлттэй байна.
           </p>
-          <a class="btn btn-primary" href="/category-upgrade">Ангилал ахиулах руу очих →</a>
+          <a class="btn btn-primary" href="/category-upgrade" data-i18n="home.upgradeCta">Ангилал ахиулах руу очих →</a>
         </section>
 
         <section class="hero-card" aria-labelledby="hero-title">
-          <p class="hero-eyebrow">Жолооны үнэмлэхийн бэлтгэл</p>
-          <h1 class="hero-title" id="hero-title">Дүрмийн шалгалтад бэлдье</h1>
-          <p class="hero-sub">40 бүлэг · 800 асуулт · Албан ёсны хариултууд</p>
-          <div class="hero-progress-track" role="progressbar" aria-label="Нийт явц" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hero-progressbar">
+          <p class="hero-eyebrow" data-i18n="home.eyebrow">Жолооны үнэмлэхийн бэлтгэл</p>
+          <h1 class="hero-title" id="hero-title" data-i18n="home.title">Дүрмийн шалгалтад бэлдье</h1>
+          <p class="hero-sub" data-i18n="home.sub">40 бүлэг · 800 асуулт · Албан ёсны хариултууд</p>
+          <div class="hero-progress-track" role="progressbar" aria-label="Нийт явц" data-i18n-attr="aria-label:common.progressAria" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="hero-progressbar">
             <div class="hero-progress-fill" id="hero-progress-fill"></div>
           </div>
-          <p class="hero-progress-label" id="hero-progress-label">Явц тооцоолж байна…</p>
+          <p class="hero-progress-label" id="hero-progress-label" data-i18n="common.progressLoading">Явц тооцоолж байна…</p>
           <div class="hero-actions">
-            <a class="btn btn-primary" id="continue-btn" href="/practice?chapter=1">Суралцаж эхлэх</a>
-            <a class="btn btn-ghost" href="#chapters">Бүлгүүдийг харах</a>
+            <a class="btn btn-primary" id="continue-btn" href="/practice?chapter=1" data-i18n="home.start">Суралцаж эхлэх</a>
+            <a class="btn btn-ghost" href="#chapters" data-i18n="home.viewChapters">Бүлгүүдийг харах</a>
           </div>
         </section>
 
         <div id="regular-course">
-        <section class="stats-grid" aria-label="Статистик">
+        <section class="stats-grid" aria-label="Статистик" data-i18n-attr="aria-label:common.statsAria">
           <div class="card stat-card">
             <div class="stat-icon" aria-hidden="true">📚</div>
             <div class="stat-value" id="stat-completed">—</div>
-            <div class="stat-label">Бүлэг эхэлсэн / 40</div>
+            <div class="stat-label" data-i18n="home.statStarted">Бүлэг эхэлсэн / 40</div>
           </div>
           <div class="card stat-card">
             <div class="stat-icon success" aria-hidden="true">✅</div>
             <div class="stat-value" id="stat-passed">—</div>
-            <div class="stat-label">Тэнцсэн бүлэг (18+)</div>
+            <div class="stat-label" data-i18n="home.statPassed">Тэнцсэн бүлэг (18+)</div>
           </div>
           <div class="card stat-card">
             <div class="stat-icon" aria-hidden="true">🎯</div>
             <div class="stat-value" id="stat-average">—</div>
-            <div class="stat-label">Дундаж оноо / 20</div>
+            <div class="stat-label" data-i18n="home.statAverage">Дундаж оноо / 20</div>
           </div>
           <div class="card stat-card">
             <div class="stat-icon accent" aria-hidden="true">🔥</div>
             <div class="stat-value" id="stat-streak">—</div>
-            <div class="stat-label">Дараалсан өдөр</div>
+            <div class="stat-label" data-i18n="home.statStreak">Дараалсан өдөр</div>
           </div>
         </section>
 
         <section aria-labelledby="recent-title" id="recent-section" hidden>
           <div class="section-header">
-            <h2 class="section-title" id="recent-title">Сүүлд үзсэн</h2>
+            <h2 class="section-title" id="recent-title" data-i18n="home.recent">Сүүлд үзсэн</h2>
           </div>
           <div class="chapter-grid" id="recent-grid"></div>
         </section>
 
         <section aria-labelledby="chapters-title" id="chapters">
           <div class="section-header">
-            <h2 class="section-title" id="chapters-title">Бүх бүлгүүд</h2>
-            <span class="section-hint">20 асуулт тус бүр</span>
+            <h2 class="section-title" id="chapters-title" data-i18n="home.allChapters">Бүх бүлгүүд</h2>
+            <span class="section-hint" data-i18n="home.perChapter">20 асуулт тус бүр</span>
           </div>
           <div class="chapter-grid" id="chapter-grid">
             <div class="skeleton-card"></div>
@@ -101,9 +109,9 @@
       </main>
 
       <footer class="footer-links">
-        <a href="/login">Багш / Сурагчийн нэвтрэлт</a>
+        <a href="/login" data-i18n="footer.login">Багш / Сурагчийн нэвтрэлт</a>
         <span aria-hidden="true">·</span>
-        <a href="https://bilguuntulga.com/durmiin-test/" target="_blank" rel="noopener">Хариултын эх сурвалж</a>
+        <a href="https://bilguuntulga.com/durmiin-test/" target="_blank" rel="noopener" data-i18n="footer.source">Хариултын эх сурвалж</a>
       </footer>
     </div>
 
